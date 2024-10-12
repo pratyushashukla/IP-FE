@@ -21,6 +21,7 @@ import {
   Alert,
   Card as MuiCard,
 } from "@mui/material";
+
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -231,7 +232,7 @@ export default function SignUpCard() {
               />
             </FormControl>
           </Grid>
-          {/* <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <FormLabel htmlFor="address">Address</FormLabel>
                   <TextField
@@ -244,7 +245,7 @@ export default function SignUpCard() {
                     variant="outlined"
                   />
                 </FormControl>
-              </Grid> */}
+              </Grid>
         </Grid>
         {/* 
             <FormControlLabel

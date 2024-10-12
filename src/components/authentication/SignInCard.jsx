@@ -1,20 +1,25 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import MuiCard from "@mui/material/Card";
-import Checkbox from "@mui/material/Checkbox";
-import FormLabel from "@mui/material/FormLabel";
-import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Link from "@mui/material/Link";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import {
+  CssBaseline,
+  FormLabel,
+  FormControl,
+  Stack,
+  Box,
+  Typography,
+  TextField,
+  Grid,
+  Link as MuiLink,
+  MenuItem,
+  Button,
+  Alert,
+  Card as MuiCard,
+} from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 
 import { styled } from "@mui/material/styles";
 
 import ForgotPassword from "./ForgotPassword";
 import { SitemarkIcon } from "./CustomIcons";
-import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { LOGIN } from "../../actions/general/ActionCreators";
 
@@ -177,7 +182,7 @@ export default function SignInCard() {
         <Typography sx={{ textAlign: "center" }}>
           Don&apos;t have an account?{" "}
           <span>
-            <Link to="/sign-in">
+            <Link to="/sign-up">
               <MuiLink
                 variant="body2"
                 sx={{ alignSelf: "center", cursor: "pointer" }}
