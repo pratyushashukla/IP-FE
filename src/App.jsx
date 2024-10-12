@@ -6,16 +6,20 @@ import {
 } from "react-router-dom";
 import { Provider } from "react-redux";
 
+import SignInSide from "./components/authentication/SignInSide";
 import SignUpSide from "./components/authentication/SignUpSide";
 import Store from "./store/Store";
+import Dashboard from "./components/dASHBOARD.JSX";
 
 function App() {
   return (
     <Provider store={Store}>
       <Router>
         <Routes>
-          {/* <Route path="/" element={<Navigate to="/sign-in" />} /> */}
+          <Route path="/" element={<Navigate to="/sign-in" />} />
+          <Route exact path="/sign-in" element={<SignInSide />} />
           <Route exact path="/sign-up" element={<SignUpSide />} />
+          <Route exact path="/dashboard" element={<Dashboard />} />
 
         </Routes>
       </Router>
