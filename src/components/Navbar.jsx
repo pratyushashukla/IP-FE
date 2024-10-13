@@ -1,33 +1,20 @@
-// Navbar.js
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Button, Tabs, Tab, Box } from '@mui/material';
+import { AppBar, Toolbar, Button, Tabs, Tab } from '@mui/material';
 import { useNavigate, Link } from 'react-router-dom';
-import LogoutDialog from './authentication/LogoutDialog'; // Importing LogoutDialog component
-
-// Menu items for navigation
-const menuItems = [
-  { label: 'Dashboard', value: 'dashboard' },
-  { label: 'Task Management', value: 'task' },
-  { label: 'Meal Management', value: 'meal' },
-  { label: 'Visit Management', value: 'visit' },
-  { label: 'Generate Report', value: 'report' }
-];
+import { useDispatch } from 'react-redux';
+import LogoutDialog from './authentication/LogoutDialog'; 
+import { LOGOUT } from "../actions/general/ActionCreators";
 
 const Navbar = ({ selectedTab, onTabChange }) => {
   const [openDialog, setOpenDialog] = useState(false); // State to handle the dialog visibility
-  const navigate = useNavigate(); // Hook for navigation
-
-  // Handle logout button click (opens the dialog)
-  const handleLogoutClick = () => {
-    setOpenDialog(true);
-  };
+  const dispatch = useDispatch(); // Redux dispatch hook
+  const navigate = useNavigate(); // React Router hook for navigation
 
   // Handle logout confirmation
   const handleLogoutConfirm = async () => {
     setOpenDialog(false); // Close the dialog
     try {
-      // Call logout service
-      navigate('/sign-in'); // Redirect to login page
+      dispatch(LOGOUT(navigate)); // Dispatch the LOGOUT action and pass the navigate function
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -37,6 +24,15 @@ const Navbar = ({ selectedTab, onTabChange }) => {
   const handleCloseDialog = () => {
     setOpenDialog(false); // Close the dialog
   };
+
+  // Menu items for navigation
+  const menuItems = [
+    { label: 'Dashboard', value: 'dashboard' },
+    { label: 'Task Management', value: 'task' },
+    { label: 'Meal Management', value: 'meal' },
+    { label: 'Visit Management', value: 'visit' },
+    { label: 'Generate Report', value: 'report' }
+  ];
 
   return (
     <AppBar position="static" sx={{ margin: 0, display: 'flex', placeItems: 'center' }}>
@@ -62,9 +58,9 @@ const Navbar = ({ selectedTab, onTabChange }) => {
             <Tab key={item.value} label={item.label} value={item.value} />
           ))}
         </Tabs>
-        
+
         {/* Logout Button */}
-        <Button color="inherit" onClick={handleLogoutClick}>
+        <Button color="inherit" onClick={() => setOpenDialog(true)}>
           Logout
         </Button>
       </Toolbar>
