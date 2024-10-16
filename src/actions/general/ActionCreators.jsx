@@ -38,16 +38,19 @@ export const LOGIN = (obj, formRef, navigate) => async () => {
   }
 };
 
-export const LOGOUT = (navigate) => async () => {
+export const LOGOUT = (navigate) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.patch(`/auth/logout`, {
       email: localStorage.getItem("email"),
     });
-    if (apiResponse.status == 200) {
-      localStorage.clear();
-      navigate("/sign-in");
+    if (apiResponse.status === 200) {
+      localStorage.clear(); // Clear local storage after successful logout
+      navigate("/sign-in"); // Redirect to sign-in page
+    } else {
+      // ToDO dispatch an error message if logout fails
+      console.error("Logout failed:", apiResponse.data.message);
     }
   } catch (error) {
-    handleNetworkError(error);
+    handleNetworkError(error); // Handle network error if API call fails
   }
 };
