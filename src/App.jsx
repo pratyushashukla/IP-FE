@@ -21,7 +21,7 @@ function App() {
           <Route exact path="/sign-in" element={<SignInSide />} />
           <Route exact path="/sign-up" element={<SignUpSide />} />
           <Route exact path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile" element={<ProfilePage />} />  //Add Path
 
         </Routes>
       </Router>

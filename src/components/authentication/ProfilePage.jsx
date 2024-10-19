@@ -17,7 +17,7 @@ const ProfilePage = () => {
     lastName: '',
     phone: '',
     address: '',
-    email: '' // Add email to the state
+    email: '' 
   });
 
   const [isEditing, setIsEditing] = React.useState({
