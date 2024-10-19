@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GETUSERDATA } from "../actions/users/ActionCreators";
-import Navbar from './Navbar'; 
 
 
 function Dashboard() {
@@ -16,8 +15,7 @@ function Dashboard() {
   }, [dispatch]);
 
   return (
-    <>
-     <Navbar />
+    <>     
       <div style={{ padding: "20px", textAlign: "center" }}>
         <h1>Inmate+ Dashboard</h1>
       </div>
