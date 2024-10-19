@@ -11,7 +11,7 @@ const ProfilePage = () => {
   const [showCustomTheme, setShowCustomTheme] = React.useState(true);
   const defaultTheme = createTheme({ palette: { mode } });
   const profileTheme = createTheme(getSignInSideTheme(mode));
-
+//
   const [profile, setProfile] = React.useState({
     firstName: '',
     lastName: '',

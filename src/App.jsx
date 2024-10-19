@@ -11,7 +11,7 @@ import SignUpSide from "./components/authentication/SignUpSide";
 import Store from "./store/Store";
 import Dashboard from "./components/Dashboard";
 import ProfilePage from './components/authentication/ProfilePage';
-
+//
 function App() {
   return (
     <Provider store={Store}>
