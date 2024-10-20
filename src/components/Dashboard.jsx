@@ -1,38 +1,51 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GETUSERDATA } from "../actions/users/ActionCreators";
-import Navbar from './Navbar'; 
-import useAutoLogout from '../hooks/useAutoLogout';
-
+import useAutoLogout from "../hooks/useAutoLogout";
 import {
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
-import { LOGOUT } from "../actions/general/ActionCreators";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
-  const disptach = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const usersData = useSelector((state) => state.UsersReducer.usersData);
 
-  console.log("usersDatausersDatausersDatausersData", usersData);
-
   useEffect(() => {
-    disptach(GETUSERDATA());
-  }, []);
+    dispatch(GETUSERDATA());
+  }, [dispatch]);
 
-  const handleLogout = () => {
-    disptach(LOGOUT(navigate));
-  }
-
-  useAutoLogout(); // auto-logout hook to track inactivity
+  const { showDialog, logout, resetInactivityTimeout } = useAutoLogout(); // Get the dialog control state from the hook
 
   return (
-    <>     
+    <>
       <div style={{ padding: "20px", textAlign: "center" }}>
         <h1>Inmate+ Dashboard</h1>
       </div>
+
+      {/* Inactivity warning dialog */}
+      <Dialog
+        open={showDialog}
+        onClose={logout} // Close dialog and logout if dismissed
+        aria-labelledby="inactivity-dialog-title"
+        aria-describedby="inactivity-dialog-description"
+      >
+        <DialogTitle id="inactivity-dialog-title">
+          {"You have been inactive"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="inactivity-dialog-description">
+            You will be logged out due to inactivity in 1 minute. Move your mouse to stay logged in.
+          </DialogContentText>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

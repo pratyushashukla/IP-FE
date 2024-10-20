@@ -31,7 +31,9 @@ const Navbar = ({ selectedTab, onTabChange }) => {
     { label: 'Task Management', value: 'task' },
     { label: 'Meal Management', value: 'meal' },
     { label: 'Visit Management', value: 'visit' },
-    { label: 'Generate Report', value: 'report' }
+    { label: 'Generate Report', value: 'report' },
+    { label: 'User Profile', value: 'userProfile' }
+
   ];
 
   return (

@@ -10,21 +10,30 @@ import SignInSide from "./components/authentication/SignInSide";
 import SignUpSide from "./components/authentication/SignUpSide";
 import Store from "./store/Store";
 import Dashboard from "./components/Dashboard";
-import ProfilePage from './components/authentication/ProfilePage';
-import FormComponent from './components/authentication/FormComponent';
-
+import Navbar from "./components/Navbar";
+import ProtectedRoutes from "./ProtectedRoutes";
+import ProfilePage from "./components/authentication/ProfilePage";
+import FormComponent from "./components/authentication/FormComponent";
 
 function App() {
   return (
     <Provider store={Store}>
-   <Router>
+      <Router>
+        <ProtectedRoutes Component={Navbar} />
+
         <Routes>
           <Route path="/" element={<Navigate to="/sign-in" />} />
           <Route exact path="/sign-in" element={<SignInSide />} />
           <Route exact path="/sign-up" element={<SignUpSide />} />
-          <Route exact path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/form" element={<FormComponent />} />  //Route
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoutes Component={Dashboard} />}
+          />
+          <Route
+            path="/profile"
+            element={<ProtectedRoutes Component={ProfilePage} />}
+          />
+          <Route path="/form" element={<FormComponent />} /> //Route
         </Routes>
       </Router>
     </Provider>
