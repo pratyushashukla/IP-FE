@@ -29,10 +29,11 @@ function Dashboard() {
   useAutoLogout(); // auto-logout hook to track inactivity
 
   return (
-    <div>
-      <h1>Inmate+ Dashboard</h1>
-      <Button type="button" onClick={()=>handleLogout()}>Logout</Button>
-    </div>
+    <>     
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <h1>Inmate+ Dashboard</h1>
+      </div>
+    </>
   );
 }
 
