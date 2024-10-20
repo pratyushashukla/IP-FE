@@ -10,8 +10,8 @@ import SignInSide from "./components/authentication/SignInSide";
 import SignUpSide from "./components/authentication/SignUpSide";
 import Store from "./store/Store";
 import Dashboard from "./components/Dashboard";
-import useAutoLogout from "./hooks/useAutoLogout";
-
+import ProfilePage from './components/authentication/ProfilePage';
+//
 function App() {
   
   return (
@@ -22,6 +22,7 @@ function App() {
           <Route exact path="/sign-in" element={<SignInSide />} />
           <Route exact path="/sign-up" element={<SignUpSide />} />
           <Route exact path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<ProfilePage />} />  //Add Path
 
         </Routes>
       </Router>
