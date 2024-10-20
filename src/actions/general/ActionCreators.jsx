@@ -45,12 +45,17 @@ export const LOGOUT = (navigate) => async (dispatch) => {
     });
     if (apiResponse.status === 200) {
       localStorage.clear(); // Clear local storage after successful logout
+      document.cookie = "authtoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Clear auth token cookie
+      
       navigate("/sign-in"); // Redirect to sign-in page
     } else {
-      // ToDO dispatch an error message if logout fails
+      // dispatch an error message if logout fails
       console.error("Logout failed:", apiResponse.data.message);
+      dispatch({ type: "LOGOUT_FAILURE", payload: apiResponse.data.message });
     }
   } catch (error) {
     handleNetworkError(error); // Handle network error if API call fails
+    dispatch({ type: "LOGOUT_FAILURE", payload: "Network error occurred during logout" });
+
   }
 };

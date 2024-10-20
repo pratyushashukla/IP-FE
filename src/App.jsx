@@ -13,6 +13,7 @@ import Dashboard from "./components/Dashboard";
 import ProfilePage from './components/authentication/ProfilePage';
 //
 function App() {
+  
   return (
     <Provider store={Store}>
       <Router>
