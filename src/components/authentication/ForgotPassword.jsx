@@ -64,7 +64,7 @@ const ForgotPassword = ({ open, handleClose }) => {
   if (open) {
     return (
       <Dialog open={open} onClose={() => handleClose()}>
-        <DialogTitle>Reset password</DialogTitle>
+        <DialogTitle>Forgot password</DialogTitle>
         <DialogContent
           sx={{
             display: "flex",
@@ -74,8 +74,7 @@ const ForgotPassword = ({ open, handleClose }) => {
           }}
         >
           <DialogContentText>
-            Enter your account&apos;s email address, and we&apos;ll send you a
-            link to reset your password.
+            Enter your email address
           </DialogContentText>
           <OutlinedInput
             error={emailError}
