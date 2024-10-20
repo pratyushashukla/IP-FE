@@ -11,12 +11,13 @@ const ProfilePage = () => {
   const [showCustomTheme, setShowCustomTheme] = React.useState(true);
   const defaultTheme = createTheme({ palette: { mode } });
   const profileTheme = createTheme(getSignInSideTheme(mode));
-
+//
   const [profile, setProfile] = React.useState({
     firstName: '',
     lastName: '',
     phone: '',
-    address: ''
+    address: '',
+    email: '' 
   });
 
   const [isEditing, setIsEditing] = React.useState({
@@ -57,7 +58,8 @@ const ProfilePage = () => {
           firstName: data.name.split(' ')[0],
           lastName: data.name.split(' ')[1],
           phone: data.phone,
-          address: `${data.address.street}, ${data.address.city}, ${data.address.zipcode}`
+          address: `${data.address.street}, ${data.address.city}, ${data.address.zipcode}`,
+          email: data.email // Add email to the profile state
         });
       } catch (error) {
         console.error('Error fetching profile data:', error);
@@ -149,6 +151,12 @@ const ProfilePage = () => {
                   </Button>
                 </Stack>
               ))}
+              <Stack direction="row" alignItems="center" spacing={2} marginBottom={2}>
+                <Typography variant="body1" sx={{ width: '30%', fontWeight: 'bold' }}>
+                  Email:
+                </Typography>
+                <Typography variant="body1" sx={{ flex: 1 }}>{profile.email}</Typography> {/* Display email as plain text */}
+              </Stack>
               <Button variant="contained" color="primary" onClick={handleSave} sx={{ width: '100%', marginTop: 2 }}>
                 Save Changes
               </Button>

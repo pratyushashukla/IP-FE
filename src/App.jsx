@@ -11,6 +11,7 @@ import SignInSide from "./components/authentication/SignInSide";
 import SignUpSide from "./components/authentication/SignUpSide";
 import Store from "./store/Store";
 import Dashboard from "./components/Dashboard";
+import ProfilePage from "./components/authentication/ProfilePage";
 import ProtectedRoutes from "./ProtectedRoutes";
 
 function App() {
@@ -25,6 +26,10 @@ function App() {
           <Route
             path="/dashboard"
             element={<ProtectedRoutes Component={Dashboard} />}
+          />
+          <Route
+            path="/profile"
+            element={<ProtectedRoutes Component={ProfilePage} />}
           />
         </Routes>
       </Router>
