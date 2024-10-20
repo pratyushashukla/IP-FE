@@ -1,122 +1,73 @@
-// ForgotPassword.jsx
-import React, { useState } from "react";
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import { useState } from 'react';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import FormHelperText from '@mui/material/FormHelperText';
 
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  OutlinedInput,
-  Typography,
-  Alert,
-} from "@mui/material";
-import VerificationCode from "./VerificationCode"; // Change PasswordReset to VerificationCode
+function ForgotPassword({ open, handleClose }) {
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
-const ForgotPassword = ({ open, handleClose }) => {
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
-  const [verifyCodeOpen, setVerifyCodeOpen] = useState(false); // Change to manage Verification Code open state
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-  const handleSubmit = async () => {
-    setError("");
-    setMessage("");
-    setEmailErrorMessage("");
-    setEmailError(false);
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      return;
-    }
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/v1/auth/forgot-password",
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setTimeout(() => {
-          setMessage("");
-          handleClose();
-          setVerifyCodeOpen(true); // Open VerificationCode component
-        }, 2000);
-
-        setMessage("An email with a verification code has been sent.");
-      } else {
-        setError(data.message || "Failed to send verification code.");
-      }
-    } catch (err) {
-      setError("Server error. Please try again later.");
+    if (!email) {
+      setEmailError('Email is required');
+    } else if (!validateEmail(email)) {
+      setEmailError('Invalid email format (e.g., username@domain.com)');
+    } else {
+      setEmailError('');
+      handleClose(); // Close the dialog upon successful validation
+      console.log('Email is valid, form submitted');
     }
   };
 
-  if (open) {
-    return (
-      <Dialog open={open} onClose={() => handleClose()}>
-        <DialogTitle>Reset password</DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            width: "100%",
-          }}
-        >
-          <DialogContentText>
-            Enter your account&apos;s email address, and we&apos;ll send you a
-            link to reset your password.
-          </DialogContentText>
-          <OutlinedInput
-            error={emailError}
-            helperText={emailErrorMessage}
-            autoFocus
-            required
-            margin="dense"
-            id="email"
-            name="email"
-            label="Email address"
-            placeholder="Email address"
-            type="email"
-            fullWidth
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {error && <Alert severity="error">{error}</Alert>}
-          {message && <Typography color="success">{message}</Typography>}
-        </DialogContent>
-        <DialogActions sx={{ pb: 3, px: 3 }}>
-          <Button onClick={() => handleClose()}>Cancel</Button>
-          <Button
-            variant="contained"
-            type="button"
-            onClick={() => handleSubmit()}
-          >
-            Continue
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  } else if (verifyCodeOpen) {
-    return (
-      <VerificationCode
-        open={verifyCodeOpen}
-        email={email}
-        setVerifyOpen={setVerifyCodeOpen}
-      />
-    );
-  } else {
-    return <></>;
-  }
+  return (
+    <Dialog open={open} onClose={handleClose} PaperProps={{ component: 'form', onSubmit: handleSubmit }}>
+      <DialogTitle>Reset password</DialogTitle>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+        <DialogContentText>
+          Enter your account&apos;s email address, and we&apos;ll send you a link to reset your password.
+        </DialogContentText>
+        <OutlinedInput
+          autoFocus
+          required
+          margin="dense"
+          id="email"
+          name="email"
+          label="Email address"
+          placeholder="Email address"
+          type="email"
+          fullWidth
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={Boolean(emailError)}
+        />
+        {emailError && <FormHelperText error>{emailError}</FormHelperText>}
+      </DialogContent>
+      <DialogActions sx={{ pb: 3, px: 3 }}>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button variant="contained" type="submit">Continue</Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+ForgotPassword.propTypes = {
+  handleClose: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
 };
 
 export default ForgotPassword;
