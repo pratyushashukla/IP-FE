@@ -10,6 +10,7 @@ const ApiService = axios.create({
   withCredentials: true,
 });
 
+//request interceptor
 ApiService.interceptors.request.use(
   async (config) => {
     if (!genericPaths.includes(config.url)) {
@@ -26,6 +27,22 @@ ApiService.interceptors.request.use(
   (error) => {
     // Do something with request error
     console.log(error);
+    return Promise.reject(error);
+  }
+);
+
+//response interceptor
+ApiService.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response.status === 401 && error.response.data.message.includes("Session expired")) {
+      // Handle session expiration and logout
+      const dispatch = useDispatch();
+      const navigate = useNavigate();
+      dispatch(LOGOUT(navigate));
+    }
     return Promise.reject(error);
   }
 );

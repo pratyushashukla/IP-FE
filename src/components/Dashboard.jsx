@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GETUSERDATA } from "../actions/users/ActionCreators";
 import Navbar from './Navbar'; 
+import useAutoLogout from '../hooks/useAutoLogout';
 
 
 function Dashboard() {
@@ -14,6 +15,8 @@ function Dashboard() {
   useEffect(() => {
     dispatch(GETUSERDATA());
   }, [dispatch]);
+
+  useAutoLogout(); // auto-logout hook to track inactivity
 
   return (
     <>

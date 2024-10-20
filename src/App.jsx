@@ -9,9 +9,11 @@ import { Provider } from "react-redux";
 import SignInSide from "./components/authentication/SignInSide";
 import SignUpSide from "./components/authentication/SignUpSide";
 import Store from "./store/Store";
-import Dashboard from "./components/dASHBOARD.JSX";
+import Dashboard from "./components/Dashboard";
+import useAutoLogout from "./hooks/useAutoLogout";
 
 function App() {
+  
   return (
     <Provider store={Store}>
       <Router>
