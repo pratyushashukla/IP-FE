@@ -1,8 +1,12 @@
 import * as React from "react";
 import Stack from "@mui/material/Stack";
 import { Box, Typography, Button, TextField } from "@mui/material";
+import { EDITUSER } from "../../actions/users/ActionCreators";
+import { useDispatch } from "react-redux";
 
 const ProfilePage = () => {
+  const dispatch = useDispatch();
+
   const [profile, setProfile] = React.useState({
     firstName: "",
     lastName: "",
@@ -61,13 +65,17 @@ const ProfilePage = () => {
   };
 
   const handleSave = () => {
-    alert("Profile updated successfully!");
-    setIsEditing({
-      firstName: false,
-      lastName: false,
-      phone: false,
-      address: false,
-    });
+    dispatch(EDITUSER(localStorage.getItem("userId"), profile));
+
+    setTimeout(() => {
+      alert("Profile updated successfully!");
+      setIsEditing({
+        firstName: false,
+        lastName: false,
+        phone: false,
+        address: false,
+      });
+    }, 2000);
   };
 
   return (
