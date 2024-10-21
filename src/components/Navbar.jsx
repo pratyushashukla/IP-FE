@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Button, Tabs, Tab } from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
+import { AppBar, Toolbar, Button } from '@mui/material';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import LogoutDialog from './authentication/LogoutDialog'; 
 import { LOGOUT } from "../actions/general/ActionCreators";
@@ -32,34 +32,38 @@ const Navbar = ({ selectedTab, onTabChange }) => {
     { label: 'Meal Management', value: 'meal' },
     { label: 'Visit Management', value: 'visit' },
     { label: 'Generate Report', value: 'report' },
-    { label: 'User Profile', value: 'userProfile' }
-
+    { label: 'User Profile', value: 'profile' }
   ];
 
   return (
     <AppBar position="static" sx={{ margin: 0, display: 'flex', placeItems: 'center' }}>
       <Toolbar sx={{ width: '100%' }}>
         {/* Clickable Logo - Redirects to Dashboard */}
-        <Link to="/dashboard">
+        <NavLink to="/dashboard">
           <img 
             src="/images/logo.jpg" 
             alt="Logo" 
             style={{ width: '50px', marginRight: '15px' }} 
           />
-        </Link>
+        </NavLink>
 
-        {/* Tabs for Navigation */}
-        <Tabs
-          value={selectedTab}
-          onChange={onTabChange}
-          textColor="inherit"
-          indicatorColor="secondary"
-          sx={{ flexGrow: 1 }}
-        >
+        {/* NavLink items for navigation */}
+        <nav style={{ flexGrow: 1, display: 'flex', justifyContent: 'space-around' }}>
           {menuItems.map((item) => (
-            <Tab key={item.value} label={item.label} value={item.value} />
+            <NavLink
+              key={item.value}
+              to={`/${item.value}`}
+              style={({ isActive }) => ({
+                textDecoration: 'none',
+                color: isActive ? 'yellow' : 'white',
+                padding: '10px 20px',
+              })}
+              activeClassName="active"
+            >
+              {item.label}
+            </NavLink>
           ))}
-        </Tabs>
+        </nav>
 
         {/* Logout Button */}
         <Button color="inherit" onClick={() => setOpenDialog(true)}>

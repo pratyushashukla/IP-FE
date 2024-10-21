@@ -33,7 +33,7 @@ function App() {
             path="/profile"
             element={<ProtectedRoutes Component={ProfilePage} />}
           />
-          <Route path="/form" element={<FormComponent />} /> //Route
+          <Route path="/form" element={<FormComponent />} />
         </Routes>
       </Router>
     </Provider>

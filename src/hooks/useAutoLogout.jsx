@@ -32,8 +32,8 @@ const useAutoLogout = () => {
       setShowDialog(true); // Show the dialog after 30 minutes of inactivity
 
       // Set a timeout for auto-logout after 5 seconds if the user doesn't respond
-      logoutTimeout.current = setTimeout(logout, 5000); // 5 seconds for auto-logout
-    }, 5 * 1000); // 30 minutes inactivity
+      logoutTimeout.current = setTimeout(logout, 60 * 1000); // 5 seconds for auto-logout
+    }, 30 * 60 * 1000); // 30 minutes inactivity
   };
 
   useEffect(() => {
