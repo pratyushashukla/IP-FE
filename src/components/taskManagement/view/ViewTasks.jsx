@@ -24,7 +24,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  DELETE_TASKS,
+  DELETE_TASK_DATA,
   GET_TASKS_DATA,
 } from "../../../actions/tasks/ActionCreators";
 import { formatDate } from "../../common/CommonFunctions";
@@ -75,7 +75,7 @@ const StatusChip = styled(Chip)(({ theme, status }) => ({
   fontWeight: "bold",
 }));
 
-const ViewTasks = () => {
+const ViewTasks = ({ handleUpdateModal }) => {
   const dispatch = useDispatch();
   const tasksData = useSelector((state) => state.TasksReducer.tasksData);
 
@@ -89,7 +89,7 @@ const ViewTasks = () => {
   // Fetch tasks data from API when the component mounts
   useEffect(() => {
     dispatch(GET_TASKS_DATA());
-  }, [dispatch]);
+  }, []);
 
   // Update tasks state after fetching data and apply manipulation
   useEffect(() => {
@@ -104,20 +104,19 @@ const ViewTasks = () => {
   };
 
   const handleCloseMenu = () => {
-    console.log("bossssssss");
     setAnchorEl(null);
     setSelectedTaskId(null);
   };
 
   const handleEdit = () => {
-    console.log("Edit task", selectedTaskId);
     handleCloseMenu();
+    handleUpdateModal(selectedTaskId);
   };
 
   const handleDelete = () => {
     const updatedTasks = tasks.filter((task) => task._id !== selectedTaskId);
     setTasks(updatedTasks);
-    dispatch(DELETE_TASKS(selectedTaskId, handleCloseMenu));
+    dispatch(DELETE_TASK_DATA(selectedTaskId, handleCloseMenu));
   };
 
   return (
@@ -198,7 +197,7 @@ const ViewTasks = () => {
         >
           <List sx={{ cursor: "pointer" }}>
             <ListItem button onClick={handleEdit}>
-              <ListItemText primary="Edit" />
+              <ListItemText primary="Details" />
             </ListItem>
             <ListItem button onClick={handleDelete}>
               <ListItemText primary="Delete" />
