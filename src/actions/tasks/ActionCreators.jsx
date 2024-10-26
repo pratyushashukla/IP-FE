@@ -25,13 +25,12 @@ export const ADD_TASK_DATA = (task, onClose) => async (dispatch) => {
   }
 };
 
-export const EDIT_TASK_DATA = (task) => async (dispatch) => {
+export const EDIT_TASK_DATA = (task, handleUpdateModal) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.patch(`/tasks/${task._id}`, task);
     if (apiResponse) {
       dispatch(GET_TASKS_DATA());
-      formRef.current.reset();
-      handleDialog(!showDialog);
+      handleUpdateModal();
     }
   } catch (error) {
     handleNetworkError(error);

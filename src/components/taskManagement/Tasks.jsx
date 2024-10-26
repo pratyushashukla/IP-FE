@@ -14,7 +14,7 @@ function Tasks() {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
   const handleCreateModal = () => setCreateModal(!createModal);
-  const handleUpdateModal = (taskId) => {
+  const handleUpdateModal = (taskId=0) => {
     setSelectedTaskId(taskId);
     setUpdateModal(!updateModal);
   }
