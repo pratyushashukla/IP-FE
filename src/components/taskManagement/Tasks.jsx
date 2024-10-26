@@ -3,18 +3,28 @@ import { useDispatch } from "react-redux";
 import ViewTasks from "./view/ViewTasks";
 import { Toolbar, Button, Box, Typography } from "@mui/material";
 import CreateTask from "./create/CreateTask";
-import { ADD_TASK_DATA } from "../../actions/tasks/ActionCreators";
+import { ADD_TASK_DATA, EDIT_TASK_DATA } from "../../actions/tasks/ActionCreators";
 import { GET_INMATES } from "../../actions/inmates/ActionCreators";
+import UpdateTask from "./update/UpdateTask";
 
 function Tasks() {
   const dispatch = useDispatch();
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [createModal, setCreateModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
 
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
+  const handleCreateModal = () => setCreateModal(!createModal);
+  const handleUpdateModal = (taskId=0) => {
+    setSelectedTaskId(taskId);
+    setUpdateModal(!updateModal);
+  }
 
   const handleCreateTask = (task) => {
-    dispatch(ADD_TASK_DATA(task, handleCloseModal));
+    dispatch(ADD_TASK_DATA(task, handleCreateModal));
+  };
+
+  const handleUpdateTask = (task) => {
+    dispatch(EDIT_TASK_DATA(task, handleUpdateModal));
   };
 
   const MemoizedViewTasks = React.memo(ViewTasks);
@@ -35,16 +45,25 @@ function Tasks() {
       </Typography>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Box flexGrow={1} /> {/* This will push the button to the right */}
-        <Button variant="contained" color="primary" onClick={handleOpenModal}>
+        <Button variant="contained" color="primary" onClick={handleCreateModal}>
           Create Task
         </Button>
       </Toolbar>
-      <MemoizedViewTasks />
-      {isModalOpen && (
+      <MemoizedViewTasks handleUpdateModal={handleUpdateModal} />
+
+      {createModal && (
         <CreateTask
-          open={isModalOpen}
-          onClose={handleCloseModal}
+          open={createModal}
+          onClose={handleCreateModal}
           onCreate={handleCreateTask}
+        />
+      )}
+      {updateModal && (
+        <UpdateTask
+          open={updateModal}
+          onClose={handleUpdateModal}
+          onUpdate={handleUpdateTask}
+          selectedTaskId={selectedTaskId}
         />
       )}
     </div>
