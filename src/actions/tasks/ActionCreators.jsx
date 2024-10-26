@@ -12,6 +12,19 @@ export const GET_TASKS_DATA = () => async (dispatch) => {
   }
 };
 
+export const ADD_TASK_DATA = (task, onClose) => async (dispatch) => {
+  try {
+    const apiResponse = await ApiService.post(`/tasks`, task);
+    console.log("apiresponse create task", apiResponse);
+    if (apiResponse) {
+      dispatch(GET_TASKS_DATA());
+      onClose();
+    }
+  } catch (error) {
+    handleNetworkError(error);
+  }
+};
+
 export const DELETE_TASKS = (id, handleCloseMenu) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.delete(`/tasks/${id}`);
