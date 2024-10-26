@@ -13,6 +13,7 @@ import { SitemarkIcon } from './CustomIcons';
 const items = [
   {
     icon: <SettingsSuggestRoundedIcon sx={{ color: 'text.secondary' }} />,
+    
     title: 'Adaptable performance',
     description:
       'Our product effortlessly adjusts to your needs, boosting efficiency and simplifying your tasks.',
@@ -43,7 +44,12 @@ export default function Content() {
       sx={{ flexDirection: 'column', alignSelf: 'center', gap: 4, maxWidth: 450 }}
     >
       <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-        <SitemarkIcon />
+        {/* <SitemarkIcon /> */}
+        <img 
+            src="/images/logo.jpg" 
+            alt="Logo" 
+            style={{ width: '50px', marginRight: '15px' }} 
+          />
       </Box>
       {items.map((item, index) => (
         <Stack key={index} direction="row" sx={{ gap: 2 }}>
