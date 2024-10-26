@@ -23,7 +23,10 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useDispatch, useSelector } from "react-redux";
-import { GET_TASKS_DATA } from "../../../actions/tasks/ActionCreators";
+import {
+  DELETE_TASKS,
+  GET_TASKS_DATA,
+} from "../../../actions/tasks/ActionCreators";
 import { formatDate } from "../../common/CommonFunctions";
 
 // Function to manipulate task data
@@ -80,6 +83,8 @@ const ViewTasks = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [tasks, setTasks] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
 
   // Fetch tasks data from API when the component mounts
   useEffect(() => {
@@ -93,15 +98,13 @@ const ViewTasks = () => {
     }
   }, [tasksData]);
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedTaskId, setSelectedTaskId] = useState(null);
-
   const handleOpenMenu = (event, taskId) => {
     setAnchorEl(event.currentTarget);
     setSelectedTaskId(taskId);
   };
 
   const handleCloseMenu = () => {
+    console.log("bossssssss");
     setAnchorEl(null);
     setSelectedTaskId(null);
   };
@@ -112,9 +115,9 @@ const ViewTasks = () => {
   };
 
   const handleDelete = () => {
-    console.log("Delete task", selectedTaskId);
-    setTasks(tasks.filter((task) => task.id !== selectedTaskId));
-    handleCloseMenu();
+    const updatedTasks = tasks.filter((task) => task._id !== selectedTaskId);
+    setTasks(updatedTasks);
+    dispatch(DELETE_TASKS(selectedTaskId, handleCloseMenu));
   };
 
   return (
@@ -130,27 +133,53 @@ const ViewTasks = () => {
               <StyledTableCell align="center">Actions</StyledTableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {tasks.map((task) => (
-              <StyledTableRow key={task.id} hover>
-                <StyledTableCell>{task.title}</StyledTableCell>
-                <StyledTableCell>{task.description}</StyledTableCell>
-                <StyledTableCell>{task.dueDate}</StyledTableCell>
-                <StyledTableCell>
-                  <StatusChip
-                    status={task.isCompleted ? "Completed" : "Pending"}
-                    label={task.isCompleted ? "Completed" : "Pending"}
-                  />
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  <Tooltip title="Options">
-                    <IconButton onClick={(e) => handleOpenMenu(e, task.id)}>
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Tooltip>
+          <TableBody sx={{ height: tasks.length > 0 ? "auto" : "300px" }}>
+            {" "}
+            {/* Adjust height as needed */}
+            {tasks.length > 0 ? (
+              tasks.map((task) => (
+                <StyledTableRow key={task.id} hover>
+                  <StyledTableCell>{task.title}</StyledTableCell>
+                  <StyledTableCell>{task.description}</StyledTableCell>
+                  <StyledTableCell>{task.dueDate}</StyledTableCell>
+                  <StyledTableCell>
+                    <StatusChip
+                      status={
+                        task.status == "Completed"
+                          ? "Completed"
+                          : task.status == "In Progress"
+                          ? "In Progress"
+                          : "Pending"
+                      }
+                      label={
+                        task.status == "Completed"
+                          ? "Completed"
+                          : task.status == "In Progress"
+                          ? "In Progress"
+                          : "Pending"
+                      }
+                    />
+                  </StyledTableCell>
+                  <StyledTableCell align="center">
+                    <Tooltip title="Options">
+                      <IconButton
+                        onClick={(e) => {
+                          handleOpenMenu(e, task._id);
+                        }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))
+            ) : (
+              <StyledTableRow>
+                <StyledTableCell colSpan={5} align="center">
+                  No tasks found
                 </StyledTableCell>
               </StyledTableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
 
@@ -160,10 +189,14 @@ const ViewTasks = () => {
           onClose={handleCloseMenu}
           anchorOrigin={{
             vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "bottom",
             horizontal: "left",
           }}
         >
-          <List>
+          <List sx={{ cursor: "pointer" }}>
             <ListItem button onClick={handleEdit}>
               <ListItemText primary="Edit" />
             </ListItem>
