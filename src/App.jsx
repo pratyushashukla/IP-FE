@@ -14,6 +14,7 @@ import Navbar from "./components/Navbar";
 import ProtectedRoutes from "./ProtectedRoutes";
 import ProfilePage from "./components/authentication/ProfilePage";
 import FormComponent from "./components/authentication/FormComponent";
+import Tasks from "./components/taskManagement/Tasks";
 
 function App() {
   return (
@@ -32,6 +33,10 @@ function App() {
           <Route
             path="/profile"
             element={<ProtectedRoutes Component={ProfilePage} />}
+          />
+          <Route
+            path="/task"
+            element={<ProtectedRoutes Component={Tasks} />}
           />
           <Route path="/form" element={<FormComponent />} />
         </Routes>
