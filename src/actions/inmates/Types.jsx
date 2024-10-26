@@ -1,0 +1,1 @@
+export const INMATES_DATA = "INMATES_DATA";
