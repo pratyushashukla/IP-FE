@@ -38,6 +38,10 @@ function App() {
             path="/task"
             element={<ProtectedRoutes Component={Tasks} />}
           />
+          <Route 
+            path="/inmate" 
+            element={<ProtectedRoutes Component = {Inmate} />} 
+          />
           <Route path="/form" element={<FormComponent />} />
         </Routes>
       </Router>
