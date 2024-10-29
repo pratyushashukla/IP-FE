@@ -1,33 +1,49 @@
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Toolbar, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Menu, MenuItem } from "@mui/material";
+import {
+  Toolbar,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  IconButton,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
-import { ADD_INMATE, GET_INMATES, EDIT_INMATE, DELETE_INMATE } from "../../actions/inmates/ActionCreators";
+import {
+  ADD_INMATE,
+  GET_INMATES,
+  EDIT_INMATE,
+  DELETE_INMATE,
+} from "../../actions/inmates/ActionCreators";
 import InmateForm from "./InmateForm";
+import { useState, useEffect } from "react";
 
 function Inmate() {
   const dispatch = useDispatch();
-  const inmates = useSelector((state) => state.inmates.data);
+  const inmates = useSelector((state) => state.InmatesReducer.inmatesData);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedInmate, setSelectedInmate] = useState(null);  // Store selected inmate for editing
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedInmate, setSelectedInmate] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
 
-  // Open modal for creating new inmate
   const handleOpenModal = () => {
-    setSelectedInmate(null);  // Clear selected inmate when creating a new one
+    setSelectedInmate(null);
     setModalOpen(true);
   };
 
-  // Open modal for editing selected inmate
   const handleOpenEditModal = (inmate) => {
-    setSelectedInmate(inmate);  // Set selected inmate data for editing
-    setModalOpen(true);  // Open the modal
+    setSelectedInmate(inmate);
+    setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    setSelectedInmate(null);  // Clear selected inmate after closing
+    setSelectedInmate(null);
   };
 
   const handleCreateInmate = (inmate) => {
@@ -35,7 +51,7 @@ function Inmate() {
   };
 
   const handleEditInmate = (inmate) => {
-    dispatch(EDIT_INMATE(selectedInmate._id, inmate, handleCloseModal));  // Use selected inmate's ID for editing
+    dispatch(EDIT_INMATE(selectedInmate._id, inmate, handleCloseModal));
   };
 
   const handleDeleteInmate = (id) => {
@@ -44,27 +60,32 @@ function Inmate() {
 
   const openMenu = (event, inmate) => {
     setAnchorEl(event.currentTarget);
-    setSelectedInmate(inmate);  // Set selected inmate for menu actions
+    setSelectedInmate(inmate);
   };
 
   const closeMenu = () => {
     setAnchorEl(null);
+    setSelectedInmate(null); // Reset selected inmate after menu close
   };
 
   useEffect(() => {
     dispatch(GET_INMATES());
   }, [dispatch]);
-
   return (
     <div>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 2,
+        }}
+      >
         <h2>Inmates</h2>
         <Button variant="contained" color="primary" onClick={handleOpenModal}>
           Add Inmate
         </Button>
       </Toolbar>
 
-      {/* Search bar */}
       <TextField
         label="Search Inmates"
         variant="outlined"
@@ -72,8 +93,6 @@ function Inmate() {
         sx={{ marginBottom: 2 }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-
-      {/* Table with inmate data */}
       <Table>
         <TableHead>
           <TableRow>
@@ -86,7 +105,9 @@ function Inmate() {
         <TableBody>
           {inmates
             .filter((inmate) =>
-              `${inmate.firstName} ${inmate.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+              `${inmate.firstName} ${inmate.lastName}`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
             )
             .map((inmate) => (
               <TableRow key={inmate._id}>
@@ -97,9 +118,19 @@ function Inmate() {
                   <IconButton onClick={(e) => openMenu(e, inmate)}>
                     <MoreVert />
                   </IconButton>
-                  <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeMenu}>
-                    <MenuItem onClick={() => handleOpenEditModal(inmate)}>Edit</MenuItem>
-                    <MenuItem onClick={() => handleDeleteInmate(inmate._id)}>Delete</MenuItem>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={
+                      Boolean(anchorEl) && selectedInmate?._id === inmate._id
+                    }
+                    onClose={closeMenu}
+                  >
+                    <MenuItem onClick={() => handleOpenEditModal(inmate)}>
+                      Edit
+                    </MenuItem>
+                    <MenuItem onClick={() => handleDeleteInmate(inmate._id)}>
+                      Delete
+                    </MenuItem>
                   </Menu>
                 </TableCell>
               </TableRow>
@@ -107,11 +138,10 @@ function Inmate() {
         </TableBody>
       </Table>
 
-      {/* Create/Edit Inmate Dialog */}
       {isModalOpen && (
         <InmateForm
           open={isModalOpen}
-          inmate={selectedInmate}  // Pass selected inmate for editing or null for creating
+          inmate={selectedInmate}
           onClose={handleCloseModal}
           onSave={selectedInmate ? handleEditInmate : handleCreateInmate}
         />
