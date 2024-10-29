@@ -5,6 +5,7 @@ import { Toolbar, Button, Box, Typography } from "@mui/material";
 import { ADD_INMATE, EDIT_INMATE } from "../../actions/inmates/ActionCreators";
 import { GET_INMATES } from "../../actions/inmates/ActionCreators";
 import UpdateInmate from "./update/UpdateInmate";
+import CreateInmates from "./create/CreateInmates";
 
 function Inmates() {
   const dispatch = useDispatch();
@@ -50,14 +51,14 @@ function Inmates() {
         </Button>
       </Toolbar>
       <MemoizedViewInmates handleUpdateModal={handleUpdateModal} />
-{/* 
+
       {createModal && (
-        <CreateTask
+        <CreateInmates
           open={createModal}
           onClose={handleCreateModal}
           onCreate={handleCreateInmate}
         />
-      )} */}
+      )}
       {updateModal && (
         <UpdateInmate
           open={updateModal}

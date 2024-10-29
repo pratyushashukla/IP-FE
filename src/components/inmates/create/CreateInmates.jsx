@@ -1,71 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   Button,
+  TextField,
   Grid,
   FormControl,
   FormLabel,
   Box,
-  Select,
   MenuItem,
 } from "@mui/material";
 
-import { useSelector } from "react-redux";
-
-// Utility function to format date
-const formatDate = (date) => {
-  if (!date) return "";
-  const d = new Date(date);
-  return d.toISOString().split("T")[0]; // Format to YYYY-MM-DD
-};
-
-const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
-  const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
-
+const CreateInmates = ({ open, onClose, onCreate }) => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     dateOfBirth: "",
-    gender: "Female", // Set default gender as "Female"
+    gender: "Female",
     contactNumber: "",
-    status: "Active", // Set default status as "Active"
+    status: "Active",
     sentenceDuration: "",
   });
-
-  useEffect(() => {
-    if (selectedInmateId) {
-      const selectedInmate = inmatesData.find(
-        (inmate) => inmate._id === selectedInmateId
-      );
-      if (selectedInmate) {
-        setFormData({
-          ...selectedInmate,
-          dateOfBirth: formatDate(selectedInmate?.dateOfBirth),
-        });
-      }
-    } else {
-      setFormData({
-        firstName: "",
-        lastName: "",
-        dateOfBirth: "",
-        gender: "Female",
-        contactNumber: "",
-        status: "Active",
-        sentenceDuration: "",
-      });
-    }
-  }, [selectedInmateId, inmatesData]);
 
   const [errors, setErrors] = useState({
     contactNumber: "",
   });
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value, type } = e.target;
+
     if (name === "contactNumber") {
       // Allow only digits and check the length
       if (!/^\d*$/.test(value)) {
@@ -85,29 +50,31 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
       }
     }
 
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = () => {
-    onUpdate(formData);
+    setFormData({
+      ...formData,
+      [name]: type === "date" ? new Date(value).toISOString() : value,
+    });
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Edit Inmate</DialogTitle>
+      <DialogTitle>Create New Inmate</DialogTitle>
       <DialogContent>
         <Box>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="firstName" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel
+                  htmlFor="firstName"
+                  sx={{ mb: 1, fontWeight: "bold" }}
+                >
                   First Name
                 </FormLabel>
                 <TextField
                   id="firstName"
                   name="firstName"
                   value={formData.firstName}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                   required
                 />
@@ -116,14 +83,17 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="lastName" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel
+                  htmlFor="lastName"
+                  sx={{ mb: 1, fontWeight: "bold" }}
+                >
                   Last Name
                 </FormLabel>
                 <TextField
                   id="lastName"
                   name="lastName"
                   value={formData.lastName}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                   required
                 />
@@ -132,15 +102,22 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="dateOfBirth" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel
+                  htmlFor="dateOfBirth"
+                  sx={{ mb: 1, fontWeight: "bold" }}
+                >
                   Date of Birth
                 </FormLabel>
                 <TextField
                   id="dateOfBirth"
                   name="dateOfBirth"
                   type="date"
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
+                  value={
+                    formData.dateOfBirth
+                      ? formData.dateOfBirth.split("T")[0]
+                      : ""
+                  }
+                  onChange={handleInputChange}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                 />
@@ -167,7 +144,10 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="contactNumber" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel
+                  htmlFor="contactNumber"
+                  sx={{ mb: 1, fontWeight: "bold" }}
+                >
                   Contact Number
                 </FormLabel>
                 <TextField
@@ -175,7 +155,7 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
                   id="contactNumber"
                   name="contactNumber"
                   value={formData.contactNumber}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                   error={Boolean(errors.contactNumber)}
                   helperText={errors.contactNumber}
@@ -188,30 +168,35 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
                 <FormLabel htmlFor="status" sx={{ mb: 1, fontWeight: "bold" }}>
                   Status
                 </FormLabel>
-                <Select
+                <TextField
                   id="status"
                   name="status"
                   value={formData.status}
-                  onChange={handleChange}
+                  select
+                  onChange={handleInputChange}
                   variant="outlined"
+                  required
                 >
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
-                </Select>
+                </TextField>
               </FormControl>
             </Grid>
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="sentenceDuration" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel
+                  htmlFor="sentenceDuration"
+                  sx={{ mb: 1, fontWeight: "bold" }}
+                >
                   Sentence Duration (Years)
                 </FormLabel>
                 <TextField
-                  type="number"
                   id="sentenceDuration"
                   name="sentenceDuration"
+                  type="number"
                   value={formData.sentenceDuration}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                 />
               </FormControl>
@@ -224,12 +209,17 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
         <Button onClick={onClose} variant="contained" color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
-          Update
+        <Button
+          type="button"
+          onClick={() => onCreate(formData)}
+          variant="contained"
+          color="primary"
+        >
+          Create
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default UpdateInmate;
+export default CreateInmates;
