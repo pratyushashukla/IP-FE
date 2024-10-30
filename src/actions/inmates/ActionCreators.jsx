@@ -29,7 +29,7 @@ export const EDIT_INMATE = (id, inmate, handleDialog) => async (dispatch) => {
     const apiResponse = await ApiService.patch(`/inmates/${id}`, inmate);
     if (apiResponse) {
       dispatch(GET_INMATES()); // Refresh inmates after editing
-      handleDialog(false); // Close dialog after editing
+      handleDialog(); // Close dialog after editing
     }
   } catch (error) {
     handleNetworkError(error);
