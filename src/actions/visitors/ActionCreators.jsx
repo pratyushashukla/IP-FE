@@ -26,3 +26,30 @@ export const ADD_VISITOR = (visitor, onClose) => async (dispatch) => {
     handleNetworkError(error);
   }
 };
+
+// Update existing visitor data
+export const EDIT_VISITOR = (visitor, handleUpdateModal) => async (dispatch) => {
+  try {
+    const apiResponse = await ApiService.patch(`/visitors/${visitor._id}`, visitor);
+    if (apiResponse) {
+      dispatch(GET_VISITORS());
+      handleUpdateModal();
+    }
+  } catch (error) {
+    handleNetworkError(error);
+  }
+};
+
+// Delete visitor data
+export const DELETE_VISITOR = (id, handleCloseMenu) => async (dispatch) => {
+  try {
+    const apiResponse = await ApiService.delete(`/visitors/${id}`);
+    console.log("API response - delete visitor", apiResponse);
+    if (apiResponse.status === 200) {
+      dispatch(GET_VISITORS());
+      handleCloseMenu();
+    }
+  } catch (error) {
+    handleNetworkError(error);
+  }
+};
