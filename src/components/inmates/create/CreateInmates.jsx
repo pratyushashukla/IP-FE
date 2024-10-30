@@ -178,7 +178,7 @@ const CreateInmates = ({ open, onClose, onCreate }) => {
                   required
                 >
                   <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Inactive">Inactive</MenuItem>
+                  <MenuItem value="InActive">InActive</MenuItem>
                 </TextField>
               </FormControl>
             </Grid>

@@ -148,7 +148,7 @@ const ViewInmates = ({ handleUpdateModal }) => {
               <StyledTableCell>Gender</StyledTableCell>
               <StyledTableCell>Contact Number</StyledTableCell>
               <StyledTableCell>Status</StyledTableCell>
-              <StyledTableCell>Sentence Duration (Years)</StyledTableCell>
+              <StyledTableCell>Sentence Duration (Months)</StyledTableCell>
               <StyledTableCell align="center">Actions</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -167,7 +167,7 @@ const ViewInmates = ({ handleUpdateModal }) => {
                   <StyledTableCell>
                     <StatusChip
                       status={
-                        inmate.status === "Active" ? "Active" : "Inactive"
+                        inmate.status === "Active" ? "Active" : "InActive"
                       }
                       label={inmate.status}
                     />

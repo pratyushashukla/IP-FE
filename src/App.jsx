@@ -16,7 +16,7 @@ import ProfilePage from "./components/authentication/ProfilePage";
 import FormComponent from "./components/authentication/FormComponent";
 import Tasks from "./components/taskManagement/Tasks";
 import Inmates from "./components/inmates/Inmates";
-
+import Visit from "./components/visit/Visit";
 
 function App() {
   return (
@@ -36,13 +36,14 @@ function App() {
             path="/profile"
             element={<ProtectedRoutes Component={ProfilePage} />}
           />
+          <Route path="/task" element={<ProtectedRoutes Component={Tasks} />} />
           <Route
-            path="/task"
-            element={<ProtectedRoutes Component={Tasks} />}
+            path="/inmate"
+            element={<ProtectedRoutes Component={Inmates} />}
           />
-          <Route 
-            path="/inmate" 
-            element={<ProtectedRoutes Component = {Inmates} />} 
+          <Route
+            path="/visit"
+            element={<ProtectedRoutes Component={Visit} />}
           />
           <Route path="/form" element={<FormComponent />} />
         </Routes>

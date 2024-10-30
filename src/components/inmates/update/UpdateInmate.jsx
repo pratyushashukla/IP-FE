@@ -196,7 +196,7 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
                   variant="outlined"
                 >
                   <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Inactive">Inactive</MenuItem>
+                  <MenuItem value="InActive">InActive</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
