@@ -4,6 +4,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import ScheduleAppointment from "./schedule/ScheduleAppointment";
 import Visitors from "./manageVisitors/Visitors";
 
 function TabPanel(props) {
@@ -85,7 +86,7 @@ export default function Visit() {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
-        Schedule an Appointment
+        <ScheduleAppointment />
       </TabPanel>
       <TabPanel value={value} index={1}>
         Appointments
