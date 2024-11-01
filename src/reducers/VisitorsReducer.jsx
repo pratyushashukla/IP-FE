@@ -7,10 +7,9 @@ const initialState = {
 const VisitorsReducer = (state = initialState, action = {}) => {
   switch (action.type) {
     case VISITORS_DATA:
-      return {
-        ...state,
+      return Object.assign({}, state, {
         visitorsData: action.payload.value,
-      };
+      });
     default:
       return state;
   }

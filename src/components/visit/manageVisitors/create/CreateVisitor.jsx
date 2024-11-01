@@ -1,3 +1,4 @@
+// src/components/visitorManagement/create/CreateVisitor.jsx
 import React, { useState } from "react";
 import {
   Dialog,
@@ -9,6 +10,7 @@ import {
   Grid,
   FormControl,
   FormLabel,
+  MenuItem,
   Box,
 } from "@mui/material";
 import { useSelector } from "react-redux";
@@ -19,15 +21,19 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
     lastname: "",
     contactNumber: "",
     address: "",
-    inmateId: "",
     relationship: "",
+    inmateId: "",
   });
 
+  // Accessing inmatesData from the Redux store
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setVisitor({ ...visitor, [name]: value });
+    setVisitor({
+      ...visitor,
+      [name]: value,
+    });
   };
 
   return (
@@ -47,7 +53,6 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
                   value={visitor.firstname}
                   onChange={handleInputChange}
                   variant="outlined"
-                  required
                 />
               </FormControl>
             </Grid>
@@ -79,7 +84,31 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
                   value={visitor.contactNumber}
                   onChange={handleInputChange}
                   variant="outlined"
+                  required
                 />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormLabel htmlFor="inmateId" sx={{ mb: 1, fontWeight: "bold" }}>
+                  Assign Inmate
+                </FormLabel>
+                <TextField
+                  id="inmateId"
+                  name="inmateId"
+                  value={visitor.inmateId}
+                  onChange={handleInputChange}
+                  select
+                  variant="outlined"
+                  required
+                >
+                  {inmatesData.map((inmate) => (
+                    <MenuItem key={inmate._id} value={inmate._id}>
+                      {`${inmate.firstName} ${inmate.lastName}`}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </FormControl>
             </Grid>
 
@@ -100,31 +129,8 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="inmateId" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Assign to Inmate
-                </FormLabel>
-                <TextField
-                  id="inmateId"
-                  name="inmateId"
-                  value={visitor.inmateId}
-                  onChange={handleInputChange}
-                  select
-                  variant="outlined"
-                  required
-                >
-                  {inmatesData.map((inmate) => (
-                    <option key={inmate._id} value={inmate._id}>
-                      {`${inmate.first_name} ${inmate.last_name}`}
-                    </option>
-                  ))}
-                </TextField>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12}>
-              <FormControl fullWidth>
                 <FormLabel htmlFor="relationship" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Relationship with Inmate
+                  Relationship
                 </FormLabel>
                 <TextField
                   id="relationship"
@@ -139,11 +145,12 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
         </Box>
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions sx={{ justifyContent: "right", pb: 2 }}>
         <Button onClick={onClose} variant="contained" color="primary">
           Cancel
         </Button>
         <Button
+          type="button"
           onClick={() => onCreate(visitor)}
           variant="contained"
           color="primary"

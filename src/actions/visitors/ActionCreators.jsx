@@ -1,12 +1,13 @@
 import ApiService, { handleNetworkError, dispatchAction } from "../../middleware/ApiService";
-import { VISITORS_DATA } from "./Actions";
+import { setVisitorsData } from "./Actions";
+
 
 // Fetch all visitors data
 export const GET_VISITORS = () => async (dispatch) => {
   try {
     const apiResponse = await ApiService.get(`/visitors`);
     if (apiResponse.status === 200) {
-      dispatchAction(dispatch, VISITORS_DATA, apiResponse.data);
+      dispatchAction(dispatch, setVisitorsData, apiResponse.data);
     }
   } catch (error) {
     handleNetworkError(error);
@@ -28,7 +29,7 @@ export const ADD_VISITOR = (visitor, onClose) => async (dispatch) => {
 };
 
 // Update existing visitor data
-export const EDIT_VISITOR = (visitor, handleUpdateModal) => async (dispatch) => {
+export const UPDATE_VISITOR = (visitor, handleUpdateModal) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.patch(`/visitors/${visitor._id}`, visitor);
     if (apiResponse) {
