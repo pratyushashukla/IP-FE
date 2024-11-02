@@ -5,10 +5,18 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import ScheduleAppointment from "./schedule/ScheduleAppointment";
+import { useDispatch } from "react-redux";
+import { GET_INMATES } from "../../actions/inmates/ActionCreators";
+import { Grid } from "@mui/material";
 import Visitors from "./manageVisitors/Visitors";
 
 function TabPanel(props) {
+  const dispatch = useDispatch();
   const { children, value, index, ...other } = props;
+
+  React.useEffect(() => {
+    dispatch(GET_INMATES());
+  }, []);
 
   return (
     <div
@@ -85,6 +93,9 @@ export default function Visit() {
           <Tab label="visitors" {...a11yProps(2)} />
         </Tabs>
       </Box>
+      <Grid container>
+      <Grid xs={1}></Grid>
+      <Grid xs={10}>
       <TabPanel value={value} index={0}>
         <ScheduleAppointment />
       </TabPanel>
@@ -94,6 +105,9 @@ export default function Visit() {
       <TabPanel value={value} index={2}>
         <Visitors />
       </TabPanel>
+      </Grid>
+      <Grid xs={1}></Grid>
+    </Grid>
     </Box>
   );
 }
