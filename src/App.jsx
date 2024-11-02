@@ -15,8 +15,8 @@ import ProtectedRoutes from "./ProtectedRoutes";
 import ProfilePage from "./components/authentication/ProfilePage";
 import FormComponent from "./components/authentication/FormComponent";
 import Tasks from "./components/taskManagement/Tasks";
-import Inmates from "./components/inmates/Inmates";
 import Visit from "./components/visit/Visit";
+import Inmates from "./components/inmates/Inmates";
 
 function App() {
   return (
