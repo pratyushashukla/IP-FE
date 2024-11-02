@@ -149,11 +149,11 @@ const ViewVisitor = ({ handleUpdateModal }) => {
         <Table>
           <TableHead>
             <TableRow>
-              <StyledTableCell>First Name</StyledTableCell>
-              <StyledTableCell>Last Name</StyledTableCell>
-              <StyledTableCell>Inmate First Name</StyledTableCell>
-              <StyledTableCell>Inmate Last Name</StyledTableCell>
-              <StyledTableCell>Contact Number</StyledTableCell>
+              <StyledTableCell>Firstname</StyledTableCell>
+              <StyledTableCell>Lastname</StyledTableCell>
+              <StyledTableCell>Inmate Firstname</StyledTableCell>
+              <StyledTableCell>Inmate Lastname</StyledTableCell>
+              <StyledTableCell>Contact</StyledTableCell>
               <StyledTableCell>Address</StyledTableCell>
               <StyledTableCell>Relationship</StyledTableCell>
               <StyledTableCell align="center">Actions</StyledTableCell>
