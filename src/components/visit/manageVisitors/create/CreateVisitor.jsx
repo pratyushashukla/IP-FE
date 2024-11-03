@@ -27,9 +27,20 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
 
   // Accessing inmatesData from the Redux store
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+  
+    if (name === "contactNumber") {
+      // Allow only digits and check the length
+      if (!/^\d*$/.test(value) || value.length > 10) {
+        setErrors({
+          ...errors,
+          contactNumber: "Contact number must be numeric and have exactly 10 digits.",
+        });
+        return;
+      }
+    }
+  
     setVisitor({
       ...visitor,
       [name]: value,

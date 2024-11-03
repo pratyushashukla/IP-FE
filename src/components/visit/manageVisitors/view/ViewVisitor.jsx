@@ -16,13 +16,18 @@ import {
   TextField,
   Button,
   Box,
+  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { GET_VISITORS, DELETE_VISITOR, SEARCH_VISITORS } from "../../../../actions/visitors/ActionCreators";
 import { styled, tableCellClasses } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ClearIcon from "@mui/icons-material/Clear"; // Import ClearIcon for the clear search button
-
 
 // Styled components for custom styling
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -56,6 +61,7 @@ const ViewVisitor = ({ handleUpdateModal }) => {
   const visitorsData = useSelector((state) => state.VisitorsReducer.visitorsData);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedVisitorId, setSelectedVisitorId] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
   const [searchParams, setSearchParams] = useState({
     name: "",
     inmateName: "",
@@ -105,11 +111,21 @@ const ViewVisitor = ({ handleUpdateModal }) => {
   };
 
   const handleDelete = () => {
+    setOpenDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
     dispatch(DELETE_VISITOR(selectedVisitorId, handleCloseMenu));
+    setOpenDialog(false);
+  };
+
+  const handleCancelDelete = () => {
+    setOpenDialog(false);
   };
 
   return (
     <Box mt={4}>
+      {/* Search Bar with Clear Functionality */}
       <Box display="flex" gap={2} mb={2} alignItems="center">
         <TextField
           label="Visitor Name"
@@ -144,7 +160,7 @@ const ViewVisitor = ({ handleUpdateModal }) => {
           </IconButton>
         </Tooltip>
       </Box>
-      
+
       <StyledTableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -198,6 +214,28 @@ const ViewVisitor = ({ handleUpdateModal }) => {
           </ListItem>
         </List>
       </Popover>
+
+      <Dialog
+        open={openDialog}
+        onClose={handleCancelDelete}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this visitor?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
