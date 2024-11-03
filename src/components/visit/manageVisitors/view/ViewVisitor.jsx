@@ -22,7 +22,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { GET_VISITORS, DELETE_VISITOR, SEARCH_VISITORS } from "../../../../actions/visitors/ActionCreators";
@@ -30,9 +29,36 @@ import { styled, tableCellClasses } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ClearIcon from "@mui/icons-material/Clear"; // Import ClearIcon for the clear search button
 
+// Styled components for custom styling
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  margin: "20px auto",
+  maxWidth: "1200px",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[4],
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: theme.palette.action.hover,
+  },
+  "&:last-child td, &:last-child th": {
+    border: 0,
+  },
+}));
+
 const ViewVisitor = ({ handleUpdateModal }) => {
   const dispatch = useDispatch();
-  const visitorsData = useSelector((state) => state.VisitorsReducer.visitorsData); // Default to an empty array
+  const visitorsData = useSelector((state) => state.VisitorsReducer.visitorsData);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedVisitorId, setSelectedVisitorId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -42,59 +68,9 @@ const ViewVisitor = ({ handleUpdateModal }) => {
     contactNumber: "",
   });
 
-  // Styled components for custom styling
-  const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-    margin: "20px auto",
-    maxWidth: "1200px",
-    borderRadius: theme.shape.borderRadius,
-    boxShadow: theme.shadows[4],
-  }));
-
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14,
-    },
-  }));
-
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    "&:nth-of-type(odd)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-    "&:last-child td, &:last-child th": {
-      border: 0,
-    },
-  }));
-
   useEffect(() => {
     dispatch(GET_VISITORS());
   }, [dispatch]);
-
-  if (!Array.isArray(visitorsData)) {
-    return <div>Loading visitors...</div>; // Optionally render a loading state
-  }
-
-  const handleOpenMenu = (event, visitorId) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedVisitorId(visitorId);
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-    setSelectedVisitorId(null);
-  };
-
-  const handleUpdate = () => {
-    handleCloseMenu();
-    handleUpdateModal(selectedVisitorId);
-  };
-
-  const handleDelete = () => {
-    setOpenDialog(true);
-  };
 
   // Update searchParams state and disable other fields when one field is active
   const handleSearchChange = (event) => {
@@ -119,6 +95,25 @@ const ViewVisitor = ({ handleUpdateModal }) => {
   // Disable search fields based on active field
   const isAnyFieldActive = !!(searchParams.name || searchParams.inmateName || searchParams.contactNumber);
 
+  const handleOpenMenu = (event, visitorId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedVisitorId(visitorId);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedVisitorId(null);
+  };
+
+  const handleUpdate = () => {
+    handleCloseMenu();
+    handleUpdateModal(selectedVisitorId);
+  };
+
+  const handleDelete = () => {
+    setOpenDialog(true);
+  };
+
   const handleConfirmDelete = () => {
     dispatch(DELETE_VISITOR(selectedVisitorId, handleCloseMenu));
     setOpenDialog(false);
@@ -130,6 +125,7 @@ const ViewVisitor = ({ handleUpdateModal }) => {
 
   return (
     <Box mt={4}>
+      {/* Search Bar with Clear Functionality */}
       <Box display="flex" gap={2} mb={2} alignItems="center">
         <TextField
           label="Visitor Name"
@@ -164,7 +160,7 @@ const ViewVisitor = ({ handleUpdateModal }) => {
           </IconButton>
         </Tooltip>
       </Box>
-      
+
       <StyledTableContainer component={Paper}>
         <Table>
           <TableHead>
