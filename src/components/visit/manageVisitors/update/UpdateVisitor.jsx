@@ -36,10 +36,25 @@ const UpdateVisitor = ({ open, onClose, onUpdate, selectedVisitorId }) => {
     }
   }, [selectedVisitorId, visitorsData]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setVisitor({ ...visitor, [name]: value });
-  };
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "contactNumber") {
+    // Allow only digits and check the length
+    if (!/^\d*$/.test(value) || value.length > 10) {
+      setErrors({
+        ...errors,
+        contactNumber: "Contact number must be numeric and have exactly 10 digits.",
+      });
+      return;
+    }
+  }
+
+  setVisitor({
+    ...visitor,
+    [name]: value,
+  });
+};
 
   const handleInmateChange = (e) => {
     setVisitor({ ...visitor, inmateId: e.target.value });
