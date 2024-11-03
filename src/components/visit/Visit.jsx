@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { GET_INMATES } from "../../actions/inmates/ActionCreators";
 import { Grid } from "@mui/material";
 import Visitors from "./manageVisitors/Visitors";
+import { GET_VISITORS } from "../../actions/visitors/ActionCreators";
 
 function TabPanel(props) {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ function TabPanel(props) {
 
   React.useEffect(() => {
     dispatch(GET_INMATES());
+    dispatch(GET_VISITORS());
   }, []);
 
   return (

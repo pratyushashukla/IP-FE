@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -7,17 +7,21 @@ import {
   Typography,
   Checkbox,
   FormControlLabel,
+  Autocomplete,
 } from "@mui/material";
-import {
-  LocalizationProvider,
-  DateTimePicker,
-} from "@mui/x-date-pickers";
+import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { ADD_VISIT } from "../../../actions/visits/ActionCreators";
 
 const ScheduleAppointment = () => {
+  const dispatch = useDispatch();
+
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
+  const visitorsData = useSelector(
+    (state) => state.VisitorsReducer.visitorsData
+  );
 
   const [formData, setFormData] = useState({
     visitorId: "",
@@ -27,11 +31,23 @@ const ScheduleAppointment = () => {
     identityVerified: false,
     flaggedForSecurity: false,
     remarks: "",
+    staffId: localStorage.getItem("userId")
   });
 
+  const [filteredVisitors, setFilteredVisitors] = useState([]);
   const [errors, setErrors] = useState({});
-  const [visitors, setVisitors] = useState([{ id: "1", name: "John Doe" }]);
-  const [inmates, setInmates] = useState([{ id: "1", name: "Jane Doe" }]);
+
+  useEffect(() => {
+    if (formData.inmateId) {
+      // Filter visitors based on selected inmate ID
+      const filtered = visitorsData.filter(
+        (visitor) => visitor.inmateId._id === formData.inmateId
+      );
+      setFilteredVisitors(filtered);
+    } else {
+      setFilteredVisitors([]);
+    }
+  }, [formData.inmateId, visitorsData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -50,6 +66,19 @@ const ScheduleAppointment = () => {
     }));
   };
 
+  const resetForm = () => {
+    setFormData({
+      visitorId: "",
+      inmateId: "",
+      startTime: null,
+      estimatedEndTime: null,
+      identityVerified: false,
+      flaggedForSecurity: false,
+      remarks: "",
+      staffId: localStorage.getItem("userId")
+    })
+  }
+
   const validateForm = () => {
     const newErrors = {};
     if (!formData.visitorId) newErrors.visitorId = "Visitor is required";
@@ -57,6 +86,7 @@ const ScheduleAppointment = () => {
     if (!formData.visitDate) newErrors.visitDate = "Visit date is required";
     if (!formData.startTime) newErrors.startTime = "Start time is required";
     if (!formData.status) newErrors.status = "Status is required";
+    if (!formData.remarks) newErrors.status = "Remarks is required regarding visitor";
     if (formData.remarks.length > 50)
       newErrors.remarks = "Remarks should not exceed 50 characters";
 
@@ -66,10 +96,8 @@ const ScheduleAppointment = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log(formData);
-    } else {
-      console.log("feewfwefwe",formData);
+    if (!validateForm()) {
+      dispatch(ADD_VISIT(formData, resetForm));
     }
   };
 
@@ -85,41 +113,73 @@ const ScheduleAppointment = () => {
               </Grid>
 
               <Grid item xs={6}>
-                <TextField
-                  select
-                  label="Visitor"
-                  name="visitorId"
-                  value={formData.visitorId}
-                  onChange={handleChange}
-                  fullWidth
-                  error={!!errors.visitorId}
-                  helperText={errors.visitorId}
-                >
-                  {visitors.map((visitor) => (
-                    <MenuItem key={visitor.id} value={visitor.id}>
-                      {visitor.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                <Autocomplete
+                  options={inmatesData}
+                  getOptionLabel={(option) =>
+                    `${option.firstName} ${option.lastName}`
+                  }
+                  filterOptions={(options, { inputValue }) =>
+                    options.filter((option) =>
+                      option.lastName
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase())
+                    )
+                  }
+                  onChange={(e, value) => {
+                    const obj = {
+                      target: {
+                        name: "inmateId",
+                        value: value ? value._id : "",
+                      },
+                    };
+                    return handleChange(obj);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Inmate"
+                      fullWidth
+                      error={!!errors.inmateId}
+                      helperText={errors.inmateId}
+                    />
+                  )}
+                />
               </Grid>
 
               <Grid item xs={6}>
-                <TextField
-                  select
-                  label="Inmate"
-                  name="inmateId"
-                  value={formData.inmateId}
-                  onChange={handleChange}
-                  fullWidth
-                  error={!!errors.inmateId}
-                  helperText={errors.inmateId}
-                >
-                  {inmatesData.map((inmate) => (
-                    <MenuItem key={inmate._id} value={inmate._id}>
-                      {`${inmate.firstName} ${inmate.lastName}`}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                <Autocomplete
+                  disabled={formData?.inmateId?.length > 0 ? false : true}
+                  options={filteredVisitors}
+                  getOptionLabel={(option) =>
+                    `${option.firstname} ${option.lastname}`
+                  }
+                  filterOptions={(options, { inputValue }) =>
+                    options.filter((option) =>
+                      option.lastname
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase())
+                    )
+                  }
+                  onChange={(e, value) => {
+                    const obj = {
+                      target: {
+                        name: "visitorId",
+                        value: value ? value._id : "",
+                      },
+                    };
+                    return handleChange(obj);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Visitor"
+                      fullWidth
+                      error={!!errors.visitorId}
+                      helperText={errors.visitorId}
+                      disabled={!formData.inmateId}
+                    />
+                  )}
+                />
               </Grid>
 
               <Grid item xs={6}>
@@ -144,7 +204,7 @@ const ScheduleAppointment = () => {
                   label="Estimated End Time"
                   value={
                     formData.estimatedEndTime
-                      ? dayjs(formData.estimatedEndTime).format("HH:mm")
+                      ? dayjs(formData.estimatedEndTime).format("hh:mm A")
                       : ""
                   }
                   fullWidth
@@ -210,6 +270,7 @@ const ScheduleAppointment = () => {
                   rows={2}
                   error={!!errors.remarks}
                   helperText={errors.remarks}
+                  required
                 />
               </Grid>
 
