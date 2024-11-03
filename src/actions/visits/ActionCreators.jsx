@@ -1,12 +1,12 @@
 import ApiService, { handleNetworkError, dispatchAction } from "../../middleware/ApiService";
-import { VISITS_DATA } from "./Actions";
+import { VISITSDATA } from "./Actions";
 
 // Fetch all visits data
 export const GET_VISITS = () => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.get(`/visits`);
+    const apiResponse = await ApiService.get(`/appointments`);
     if (apiResponse.status === 200) {
-      dispatchAction(dispatch, VISITS_DATA, apiResponse.data);
+      dispatchAction(dispatch, VISITSDATA, apiResponse.data);
     }
   } catch (error) {
     handleNetworkError(error);
@@ -14,13 +14,13 @@ export const GET_VISITS = () => async (dispatch) => {
 };
 
 // Add new visit data
-export const ADD_VISIT = (visit, onClose) => async (dispatch) => {
+export const ADD_VISIT = (visit, resetForm) => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.post(`/visits`, visit);
+    const apiResponse = await ApiService.post(`/appointments`, visit);
     console.log("API response - create visit", apiResponse);
     if (apiResponse) {
       dispatch(GET_VISITS());
-      onClose();
+      resetForm();
     }
   } catch (error) {
     handleNetworkError(error);
@@ -30,7 +30,7 @@ export const ADD_VISIT = (visit, onClose) => async (dispatch) => {
 // Edit existing visit data
 export const EDIT_VISIT = (visit, handleUpdateModal) => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.patch(`/visits/${visit._id}`, visit);
+    const apiResponse = await ApiService.patch(`/appointments/${visit._id}`, visit);
     if (apiResponse) {
       dispatch(GET_VISITS());
       handleUpdateModal();
@@ -43,7 +43,7 @@ export const EDIT_VISIT = (visit, handleUpdateModal) => async (dispatch) => {
 // Delete visit data
 export const DELETE_VISIT = (id, handleCloseMenu) => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.delete(`/visits/${id}`);
+    const apiResponse = await ApiService.delete(`/appointments/${id}`);
     console.log("API response - delete visit", apiResponse);
     if (apiResponse.status === 200) {
       dispatch(GET_VISITS());
