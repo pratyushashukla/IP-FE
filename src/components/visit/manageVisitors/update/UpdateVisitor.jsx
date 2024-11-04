@@ -16,7 +16,9 @@ import {
 import { useSelector } from "react-redux";
 
 const UpdateVisitor = ({ open, onClose, onUpdate, selectedVisitorId }) => {
-  const visitorsData = useSelector((state) => state.VisitorsReducer.visitorsData);
+  const visitorsData = useSelector(
+    (state) => state.VisitorsReducer.visitorsData
+  );
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData); // Assuming inmates are stored here
   const [visitor, setVisitor] = useState({
     firstname: "",
@@ -27,37 +29,67 @@ const UpdateVisitor = ({ open, onClose, onUpdate, selectedVisitorId }) => {
     inmateId: "", // Added inmateId here
   });
 
+  const [errors, setErrors] = useState({
+    relationship: "",
+    contactNumber: "",
+  });
+
   useEffect(() => {
     if (selectedVisitorId) {
       const selectedVisitor = visitorsData.find(
         (visitor) => visitor._id === selectedVisitorId
       );
-      if (selectedVisitor) setVisitor(selectedVisitor);
+      if (selectedVisitor) {
+        const inmate = inmatesData.find(
+          (inmate) => inmate._id === selectedVisitor.inmateId._id
+        );
+        if (inmate) {
+          setVisitor({
+            ...selectedVisitor,
+            inmateId: `${inmate.firstName} ${inmate.lastName}`,
+            firstname: selectedVisitor.firstname,
+            lastname: selectedVisitor.lastname,
+          });
+        }
+      }
     }
-  }, [selectedVisitorId, visitorsData]);
+  }, [selectedVisitorId, visitorsData, inmatesData]);
 
-const handleInputChange = (e) => {
-  const { name, value } = e.target;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
 
-  if (name === "contactNumber") {
-    // Allow only digits and check the length
-    if (!/^\d*$/.test(value) || value.length > 10) {
-      setErrors({
-        ...errors,
-        contactNumber: "Contact number must be numeric and have exactly 10 digits.",
-      });
-      return;
+    if (name === "relationship") {
+      if (value === "") {
+        setErrors({
+          ...errors,
+          relationship: "Please select a relationship",
+        });
+      } else {
+        setErrors({
+          ...errors,
+          relationship: "",
+        });
+      }
     }
-  }
 
-  setVisitor({
-    ...visitor,
-    [name]: value,
-  });
-};
+    if (name === "contactNumber") {
+      if (value.length === 10 && /^\d+$/.test(value)) {
+        setErrors({
+          ...errors,
+          contactNumber: "",
+        });
+      } else {
+        setErrors({
+          ...errors,
+          contactNumber: "Contact number must be 10 digits",
+        });
+      }
+    }
 
-  const handleInmateChange = (e) => {
-    setVisitor({ ...visitor, inmateId: e.target.value });
+    setVisitor({
+      ...visitor,
+      [name]: value,
+    });
   };
 
   return (
@@ -66,6 +98,41 @@ const handleInputChange = (e) => {
       <DialogContent>
         <Box>
           <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormLabel sx={{ mb: 1 }}>Inmate Name</FormLabel>
+                <TextField
+                  name="inmateId"
+                  value={visitor.inmateId}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormLabel sx={{ mb: 1 }}>Relationship</FormLabel>
+                <Select
+                  name="relationship"
+                  value={visitor.relationship}
+                  onChange={handleInputChange}
+                  variant="outlined"
+                  error={errors.relationship !== ""}
+                >
+                  <MenuItem value="">Select a relationship</MenuItem>
+                  <MenuItem value="family">Family</MenuItem>
+                  <MenuItem value="friend">Friend</MenuItem>
+                  {/* Add more relationships as needed */}
+                </Select>
+                {errors.relationship !== "" && (
+                  <div style={{ color: "red" }}>{errors.relationship}</div>
+                )}
+              </FormControl>
+            </Grid>
+
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormLabel sx={{ mb: 1 }}>First Name</FormLabel>
@@ -99,7 +166,11 @@ const handleInputChange = (e) => {
                   value={visitor.contactNumber}
                   onChange={handleInputChange}
                   variant="outlined"
+                  error={errors.contactNumber !== ""}
                 />
+                {errors.contactNumber !== "" && (
+                  <div style={{ color: "red" }}>{errors.contactNumber}</div>
+                )}
               </FormControl>
             </Grid>
 
@@ -114,40 +185,6 @@ const handleInputChange = (e) => {
                 />
               </FormControl>
             </Grid>
-
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormLabel sx={{ mb: 1 }}>Relationship</FormLabel>
-                <TextField
-                  name="relationship"
-                  value={visitor.relationship}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                />
-              </FormControl>
-            </Grid>
-
-            {/* Dropdown for Inmate Selection */}
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormLabel sx={{ mb: 1 }}>Assign Inmate</FormLabel>
-                <Select
-                  value={visitor.inmateId || ""}
-                  onChange={handleInmateChange}
-                  displayEmpty
-                  variant="outlined"
-                >
-                  <MenuItem value="" disabled>
-                    Select an Inmate
-                  </MenuItem>
-                  {inmatesData.map((inmate) => (
-                    <MenuItem key={inmate._id} value={inmate._id}>
-                      {inmate.firstName} {inmate.lastName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
           </Grid>
         </Box>
       </DialogContent>
@@ -160,6 +197,16 @@ const handleInputChange = (e) => {
           onClick={() => onUpdate(visitor)}
           variant="contained"
           color="primary"
+          disabled={
+            !visitor.firstname ||
+            !visitor.lastname ||
+            !visitor.contactNumber ||
+            !visitor.address ||
+            !visitor.relationship ||
+            !visitor.inmateId ||
+            errors.relationship !== "" ||
+            errors.contactNumber !== ""
+          }
         >
           Update
         </Button>
