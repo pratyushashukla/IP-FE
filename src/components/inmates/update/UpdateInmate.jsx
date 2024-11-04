@@ -204,7 +204,7 @@ const UpdateInmate = ({ open, onClose, onUpdate, selectedInmateId }) => {
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormLabel htmlFor="sentenceDuration" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Sentence Duration (Years)
+                  Sentence Duration (Months)
                 </FormLabel>
                 <TextField
                   type="number"
