@@ -53,3 +53,26 @@ export const DELETE_VISIT = (id, handleCloseMenu) => async (dispatch) => {
     handleNetworkError(error);
   }
 };
+
+// Search visitors by filter parameters
+export const SEARCH_VISITS = (searchParams) => async (dispatch) => {
+  try {
+    const { name, inmateName, status } = searchParams;
+
+    // Construct query string based on provided search parameters
+    const query = new URLSearchParams();
+    if (name) query.append("name", name);
+    if (inmateName) query.append("inmateName", inmateName);
+    if (status) query.append("status", status);
+
+    const apiResponse = await ApiService.get(
+      `/appointments/search?${query.toString()}`
+    );
+
+    if (apiResponse.status === 200) {
+      dispatchAction(dispatch, VISITSDATA, apiResponse.data);
+    }
+  } catch (error) {
+    handleNetworkError(error);
+  }
+};

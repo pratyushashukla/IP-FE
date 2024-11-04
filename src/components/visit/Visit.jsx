@@ -10,6 +10,7 @@ import { GET_INMATES } from "../../actions/inmates/ActionCreators";
 import { Grid } from "@mui/material";
 import Visitors from "./manageVisitors/Visitors";
 import { GET_VISITORS } from "../../actions/visitors/ActionCreators";
+import Appointments from "./appointments/Appointments";
 
 function TabPanel(props) {
   const dispatch = useDispatch();
@@ -102,7 +103,7 @@ export default function Visit() {
         <ScheduleAppointment />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Appointments
+        <Appointments />
       </TabPanel>
       <TabPanel value={value} index={2}>
         <Visitors />
