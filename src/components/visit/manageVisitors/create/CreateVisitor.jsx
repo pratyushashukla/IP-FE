@@ -12,7 +12,6 @@ import {
   FormLabel,
   MenuItem,
   Box,
-  Select,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 
@@ -144,18 +143,13 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
                 <FormLabel htmlFor="relationship" sx={{ mb: 1, fontWeight: "bold" }}>
                   Relationship
                 </FormLabel>
-                <Select
+                <TextField
                   id="relationship"
                   name="relationship"
                   value={visitor.relationship}
                   onChange={handleInputChange}
                   variant="outlined"
-                >
-                  <MenuItem value="">Select a relationship</MenuItem>
-                  <MenuItem value="family">Family</MenuItem>
-                  <MenuItem value="friend">Friend</MenuItem>
-                  {/* Add more relationships as needed */}
-                </Select>
+                />
               </FormControl>
             </Grid>
           </Grid>
