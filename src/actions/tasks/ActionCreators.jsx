@@ -38,3 +38,13 @@ export const DELETE_TASKS = (id, handleCloseMenu) => async (dispatch) => {
   }
 };
 
+export const GET_FILTERED_TASKS = (selectedStatus) => async (dispatch) => {
+  try {
+    const apiResponse = await ApiService.get(`/tasks/filter?status=${selectedStatus}`);
+    if (apiResponse.status == 200) {
+      dispatchAction(dispatch, TASKSDATA, apiResponse.data);
+    }
+  } catch (error) {
+    handleNetworkError(error);
+  }
+};

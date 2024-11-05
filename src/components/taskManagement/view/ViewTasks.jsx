@@ -19,13 +19,17 @@ import {
   useMediaQuery,
   styled,
   Box,
-  tableCellClasses,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DELETE_TASKS,
   GET_TASKS_DATA,
+  GET_FILTERED_TASKS
 } from "../../../actions/tasks/ActionCreators";
 import { formatDate } from "../../common/CommonFunctions";
 
@@ -47,11 +51,11 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
 }));
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
+  [`&.${TableCell.head}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
   },
-  [`&.${tableCellClasses.body}`]: {
+  [`&.${TableCell.body}`]: {
     fontSize: 14,
   },
 }));
@@ -66,37 +70,68 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
+const statusColors = (theme) => ({
+  'Pending': theme.palette.error.main,
+  'In Progress': theme.palette.warning.main,
+  'Completed': theme.palette.success.main,
+});
+
 const StatusChip = styled(Chip)(({ theme, status }) => ({
-  backgroundColor:
-    status === "Completed"
-      ? theme.palette.success.main
-      : theme.palette.warning.main,
+  backgroundColor: statusColors(theme)[status],
   color: theme.palette.common.white,
   fontWeight: "bold",
+  borderRadius: theme.shape.borderRadius * 2,
+  padding: theme.spacing(1),
+  fontSize: theme.typography.pxToRem(12),
+  border: `1px solid ${theme.palette.primary.main}`,
+  boxShadow: theme.shadows[4]
 }));
 
 const ViewTasks = () => {
   const dispatch = useDispatch();
   const tasksData = useSelector((state) => state.TasksReducer.tasksData);
+  const filteredTasksData = useSelector((state) => state.TasksReducer.filteredTasksData);
+  const isLoading = useSelector((state) => state.TasksReducer.isLoading);
+  const error = useSelector((state) => state.TasksReducer.error);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [tasks, setTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]); // State for filtered tasks
+  const [statusFilter, setStatusFilter] = useState(""); // Track selected status
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
-  // Fetch tasks data from API when the component mounts
   useEffect(() => {
     dispatch(GET_TASKS_DATA());
   }, [dispatch]);
 
-  // Update tasks state after fetching data and apply manipulation
   useEffect(() => {
     if (tasksData) {
-      setTasks(manipulateTasksData(tasksData));
+      const manipulatedTasks = manipulateTasksData(tasksData);
+      setTasks(manipulatedTasks);
+      setFilteredTasks(manipulatedTasks); // Initialize with all tasks
     }
   }, [tasksData]);
+
+  useEffect(() => {
+    if (filteredTasksData) {
+      setFilteredTasks(filteredTasksData);
+    }
+  }, [filteredTasksData]);
+
+  const handleFilterChange = (e) => {
+    const selectedStatus = e.target.value;
+    setStatusFilter(selectedStatus);
+  
+    if (selectedStatus) {
+      const filteredTasks = tasks.filter((task) => task.status === selectedStatus);
+      setFilteredTasks(filteredTasks);
+    } else {
+      setFilteredTasks(tasks);
+    }
+  };
 
   const handleOpenMenu = (event, taskId) => {
     setAnchorEl(event.currentTarget);
@@ -104,7 +139,7 @@ const ViewTasks = () => {
   };
 
   const handleCloseMenu = () => {
-    console.log("bossssssss");
+    console.log("Closing menu");
     setAnchorEl(null);
     setSelectedTaskId(null);
   };
@@ -115,13 +150,45 @@ const ViewTasks = () => {
   };
 
   const handleDelete = () => {
-    const updatedTasks = tasks.filter((task) => task._id !== selectedTaskId);
+    const updatedTasks = tasks.filter((task) => task.id !== selectedTaskId);
     setTasks(updatedTasks);
+    setFilteredTasks(filteredTasks.filter((task) => task.id !== selectedTaskId));
     dispatch(DELETE_TASKS(selectedTaskId, handleCloseMenu));
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
     <Box mt={4}>
+      {/* Filter Dropdown */}
+      <FormControl
+        sx={{
+          minWidth: 200,
+          marginBottom: 2,
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        <InputLabel sx={{ color: theme.palette.text.primary }}>
+          Status
+        </InputLabel>
+        <Select
+          value={statusFilter}
+          onChange={handleFilterChange}
+          sx={{ backgroundColor: theme.palette.background.paper }}
+        >
+          <MenuItem value="">All</MenuItem>
+          <MenuItem value="Pending">Pending</MenuItem>
+          <MenuItem value="In Progress">In Progress</MenuItem>
+          <MenuItem value="Completed">Completed</MenuItem>
+        </Select>
+      </FormControl>
+
       <StyledTableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -134,39 +201,18 @@ const ViewTasks = () => {
             </TableRow>
           </TableHead>
           <TableBody sx={{ height: tasks.length > 0 ? "auto" : "300px" }}>
-            {" "}
-            {/* Adjust height as needed */}
-            {tasks.length > 0 ? (
-              tasks.map((task) => (
+            {filteredTasks.length > 0 ? (
+              filteredTasks.map((task) => (
                 <StyledTableRow key={task.id} hover>
                   <StyledTableCell>{task.title}</StyledTableCell>
                   <StyledTableCell>{task.description}</StyledTableCell>
-                  <StyledTableCell>{task.dueDate}</StyledTableCell>
+                  <StyledTableCell>{formatDate(task.dueDate)}</StyledTableCell>
                   <StyledTableCell>
-                    <StatusChip
-                      status={
-                        task.status == "Completed"
-                          ? "Completed"
-                          : task.status == "In Progress"
-                          ? "In Progress"
-                          : "Pending"
-                      }
-                      label={
-                        task.status == "Completed"
-                          ? "Completed"
-                          : task.status == "In Progress"
-                          ? "In Progress"
-                          : "Pending"
-                      }
-                    />
+                    <StatusChip status={task.status} label={task.status} />
                   </StyledTableCell>
                   <StyledTableCell align="center">
                     <Tooltip title="Options">
-                      <IconButton
-                        onClick={(e) => {
-                          handleOpenMenu(e, task._id);
-                        }}
-                      >
+                      <IconButton onClick={(e) => handleOpenMenu(e, task.id)}>
                         <MoreVertIcon />
                       </IconButton>
                     </Tooltip>
