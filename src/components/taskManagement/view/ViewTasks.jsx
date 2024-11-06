@@ -27,7 +27,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  DELETE_TASKS,
+  DELETE_TASK_DATA,
   GET_TASKS_DATA,
   GET_FILTERED_TASKS
 } from "../../../actions/tasks/ActionCreators";
@@ -87,7 +87,7 @@ const StatusChip = styled(Chip)(({ theme, status }) => ({
   boxShadow: theme.shadows[4]
 }));
 
-const ViewTasks = () => {
+const ViewTasks = ({ handleUpdateModal }) => {
   const dispatch = useDispatch();
   const tasksData = useSelector((state) => state.TasksReducer.tasksData);
   const filteredTasksData = useSelector((state) => state.TasksReducer.filteredTasksData);
@@ -105,7 +105,7 @@ const ViewTasks = () => {
 
   useEffect(() => {
     dispatch(GET_TASKS_DATA());
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     if (tasksData) {
@@ -145,15 +145,15 @@ const ViewTasks = () => {
   };
 
   const handleEdit = () => {
-    console.log("Edit task", selectedTaskId);
     handleCloseMenu();
+    handleUpdateModal(selectedTaskId);
   };
 
   const handleDelete = () => {
     const updatedTasks = tasks.filter((task) => task._id !== selectedTaskId);
     setTasks(updatedTasks);
     setFilteredTasks(filteredTasks.filter((task) => task._id !== selectedTaskId));
-    dispatch(DELETE_TASKS(selectedTaskId, handleCloseMenu));
+    dispatch(DELETE_TASK_DATA(selectedTaskId, handleCloseMenu));
   };
 
   if (isLoading) {
@@ -244,7 +244,7 @@ const ViewTasks = () => {
         >
           <List sx={{ cursor: "pointer" }}>
             <ListItem button onClick={handleEdit}>
-              <ListItemText primary="Edit" />
+              <ListItemText primary="Details" />
             </ListItem>
             <ListItem button onClick={handleDelete}>
               <ListItemText primary="Delete" />

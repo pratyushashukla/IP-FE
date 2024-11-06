@@ -1,33 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import ViewTasks from "./view/ViewTasks";
+import ViewInmates from "./view/ViewInmates";
 import { Toolbar, Button, Box, Typography } from "@mui/material";
-import CreateTask from "./create/CreateTask";
-import { ADD_TASK_DATA, EDIT_TASK_DATA } from "../../actions/tasks/ActionCreators";
+import { ADD_INMATE, EDIT_INMATE } from "../../actions/inmates/ActionCreators";
 import { GET_INMATES } from "../../actions/inmates/ActionCreators";
-import UpdateTask from "./update/UpdateTask";
+import UpdateInmate from "./update/UpdateInmate";
+import CreateInmates from "./create/CreateInmates";
 
-function Tasks() {
+function Inmates() {
   const dispatch = useDispatch();
   const [createModal, setCreateModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [selectedInmateId, setSelectedInmateId] = useState(null);
 
   const handleCreateModal = () => setCreateModal(!createModal);
-  const handleUpdateModal = (taskId=0) => {
-    setSelectedTaskId(taskId);
+
+  const handleUpdateModal = (inmateId = 0) => {
+    setSelectedInmateId(inmateId);
     setUpdateModal(!updateModal);
-  }
-
-  const handleCreateTask = (task) => {
-    dispatch(ADD_TASK_DATA(task, handleCreateModal));
   };
 
-  const handleUpdateTask = (task) => {
-    dispatch(EDIT_TASK_DATA(task, handleUpdateModal));
+  const handleCreateInmate = (data) => {
+    dispatch(ADD_INMATE(data, handleCreateModal));
   };
 
-  const MemoizedViewTasks = React.memo(ViewTasks);
+  const handleUpdateInmate = (data) => {
+    dispatch(EDIT_INMATE(selectedInmateId, data, handleUpdateModal));
+  };
+
+  const MemoizedViewInmates = React.memo(ViewInmates);
 
   useEffect(() => {
     dispatch(GET_INMATES());
@@ -41,33 +42,33 @@ function Tasks() {
         gutterBottom
         sx={{ mt: 4, fontWeight: "bold" }}
       >
-        Task Management
+        Manage Inmates
       </Typography>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Box flexGrow={1} /> {/* This will push the button to the right */}
         <Button variant="contained" color="primary" onClick={handleCreateModal}>
-          Create Task
+          Create Inmate
         </Button>
       </Toolbar>
-      <MemoizedViewTasks handleUpdateModal={handleUpdateModal} />
+      <MemoizedViewInmates handleUpdateModal={handleUpdateModal} />
 
       {createModal && (
-        <CreateTask
+        <CreateInmates
           open={createModal}
           onClose={handleCreateModal}
-          onCreate={handleCreateTask}
+          onCreate={handleCreateInmate}
         />
       )}
       {updateModal && (
-        <UpdateTask
+        <UpdateInmate
           open={updateModal}
           onClose={handleUpdateModal}
-          onUpdate={handleUpdateTask}
-          selectedTaskId={selectedTaskId}
+          onUpdate={handleUpdateInmate}
+          selectedInmateId={selectedInmateId}
         />
       )}
     </div>
   );
 }
 
-export default Tasks;
+export default Inmates;

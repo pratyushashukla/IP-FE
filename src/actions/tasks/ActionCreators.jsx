@@ -25,7 +25,19 @@ export const ADD_TASK_DATA = (task, onClose) => async (dispatch) => {
   }
 };
 
-export const DELETE_TASKS = (id, handleCloseMenu) => async (dispatch) => {
+export const EDIT_TASK_DATA = (task, handleUpdateModal) => async (dispatch) => {
+  try {
+    const apiResponse = await ApiService.patch(`/tasks/${task._id}`, task);
+    if (apiResponse) {
+      dispatch(GET_TASKS_DATA());
+      handleUpdateModal();
+    }
+  } catch (error) {
+    handleNetworkError(error);
+  }
+};
+
+export const DELETE_TASK_DATA = (id, handleCloseMenu) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.delete(`/tasks/${id}`);
     console.log("apiResponse",apiResponse);
