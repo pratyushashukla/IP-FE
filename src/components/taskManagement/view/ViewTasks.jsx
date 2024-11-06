@@ -150,9 +150,9 @@ const ViewTasks = () => {
   };
 
   const handleDelete = () => {
-    const updatedTasks = tasks.filter((task) => task.id !== selectedTaskId);
+    const updatedTasks = tasks.filter((task) => task._id !== selectedTaskId);
     setTasks(updatedTasks);
-    setFilteredTasks(filteredTasks.filter((task) => task.id !== selectedTaskId));
+    setFilteredTasks(filteredTasks.filter((task) => task._id !== selectedTaskId));
     dispatch(DELETE_TASKS(selectedTaskId, handleCloseMenu));
   };
 
@@ -203,7 +203,7 @@ const ViewTasks = () => {
           <TableBody sx={{ height: tasks.length > 0 ? "auto" : "300px" }}>
             {filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
-                <StyledTableRow key={task.id} hover>
+                <StyledTableRow key={task._id} hover>
                   <StyledTableCell>{task.title}</StyledTableCell>
                   <StyledTableCell>{task.description}</StyledTableCell>
                   <StyledTableCell>{formatDate(task.dueDate)}</StyledTableCell>
@@ -212,7 +212,7 @@ const ViewTasks = () => {
                   </StyledTableCell>
                   <StyledTableCell align="center">
                     <Tooltip title="Options">
-                      <IconButton onClick={(e) => handleOpenMenu(e, task.id)}>
+                      <IconButton onClick={(e) => handleOpenMenu(e, task._id)}>
                         <MoreVertIcon />
                       </IconButton>
                     </Tooltip>
