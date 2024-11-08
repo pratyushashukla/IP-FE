@@ -1,3 +1,4 @@
+// App.jsx
 import {
   BrowserRouter as Router,
   Route,
@@ -22,31 +23,34 @@ function App() {
   return (
     <Provider store={Store}>
       <Router>
-        <ProtectedRoutes Component={Navbar} />
+        {/* Apply white background and full viewport height */}
+        <div style={{ backgroundColor: "white", minHeight: "100vh" }}>
+          <ProtectedRoutes Component={Navbar} />
 
-        <Routes>
-          <Route path="/" element={<Navigate to="/sign-in" />} />
-          <Route exact path="/sign-in" element={<SignInSide />} />
-          <Route exact path="/sign-up" element={<SignUpSide />} />
-          <Route
-            path="/dashboard"
-            element={<ProtectedRoutes Component={Dashboard} />}
-          />
-          <Route
-            path="/profile"
-            element={<ProtectedRoutes Component={ProfilePage} />}
-          />
-          <Route path="/task" element={<ProtectedRoutes Component={Tasks} />} />
-          <Route
-            path="/inmate"
-            element={<ProtectedRoutes Component={Inmates} />}
-          />
-          <Route
-            path="/visit"
-            element={<ProtectedRoutes Component={Visit} />}
-          />
-          <Route path="/form" element={<FormComponent />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<Navigate to="/sign-in" />} />
+            <Route exact path="/sign-in" element={<SignInSide />} />
+            <Route exact path="/sign-up" element={<SignUpSide />} />
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoutes Component={Dashboard} />}
+            />
+            <Route
+              path="/profile"
+              element={<ProtectedRoutes Component={ProfilePage} />}
+            />
+            <Route path="/task" element={<ProtectedRoutes Component={Tasks} />} />
+            <Route
+              path="/inmate"
+              element={<ProtectedRoutes Component={Inmates} />}
+            />
+            <Route
+              path="/visit"
+              element={<ProtectedRoutes Component={Visit} />}
+            />
+            <Route path="/form" element={<FormComponent />} />
+          </Routes>
+        </div>
       </Router>
     </Provider>
   );

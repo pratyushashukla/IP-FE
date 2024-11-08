@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
-  Button,
   Box,
   Tooltip,
   IconButton,
@@ -40,7 +39,7 @@ const Navbar = ({ selectedTab, onTabChange }) => {
   // Menu items for navigation
   const menuItems = [
     { label: "Dashboard", value: "dashboard" },
-    { label: "Inmates ", value: "inmate" },
+    { label: "Inmates", value: "inmate" },
     { label: "Task Management", value: "task" },
     { label: "Meal Management", value: "meal" },
     { label: "Visit Management", value: "visit" },
@@ -57,29 +56,33 @@ const Navbar = ({ selectedTab, onTabChange }) => {
   };
 
   return (
-    <AppBar
-      position="static"
-      sx={{ margin: 0, display: "flex", placeItems: "center" }}
-    >
-      <Toolbar sx={{ width: "100%" }}>
+    <AppBar position="static" sx={{ margin: 0 }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         {/* Clickable Logo - Redirects to Dashboard */}
-        <NavLink to="/dashboard">
+        <NavLink to="/dashboard" style={{ display: "flex", alignItems: "center" }}>
           <img
             src="/images/logo.jpg"
             alt="Logo"
-            style={{ width: "50px", marginRight: "15px" }}
+            style={{
+              width: "50px",
+              marginLeft: "15px",
+              border: "3px solid #FFA500", // Orange border
+              backgroundColor: "#ADD8E6", // Light blue background
+              borderRadius: "50%",       // Circular shape
+              padding: "5px",
+              transition: "transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease",
+              cursor: "pointer",
+              "&:hover": {
+                transform: "scale(1.2)", // Slight scale-up on hover
+                backgroundColor: "#FFD700", // Gold background on hover
+                borderColor: "#FF8C00", // Dark orange border on hover
+              },
+            }}
           />
         </NavLink>
 
-        {/* NavLink items for navigation */}
-        <nav
-          style={{
-            flexGrow: 1,
-            display: "flex",
-            justifyContent: "center",
-            gap: "20px",
-          }}
-        >
+        {/* Centered NavLink items */}
+        <Box sx={{ display: "flex", gap: "20px" }}>
           {menuItems.map((item) => (
             <NavLink
               key={item.value}
@@ -89,49 +92,70 @@ const Navbar = ({ selectedTab, onTabChange }) => {
                 color: isActive ? "yellow" : "white",
                 padding: "10px 20px",
               })}
-              activeClassName="active"
             >
               {item.label}
             </NavLink>
           ))}
-        </nav>
+        </Box>
 
-        {/* User Avatar and Menu */}
-        <Box sx={{ flexGrow: 0 }}>
+        {/* User Avatar with attractive styling */}
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <Tooltip title="Open settings">
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-              <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
+              <Avatar
+                alt="User Avatar"
+                src="/static/images/avatar/2.jpg"
+                sx={{
+                  width: "40px",
+                  height: "40px",
+                  backgroundColor: "#4169E1", // Royal blue background color
+                  border: "3px solid #FFA500", // Orange border color
+                  padding: "3px",
+                  borderRadius: "50%",
+                  boxShadow: "0 6px 10px rgba(0, 0, 0, 0.5)", // Light shadow for depth
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease",
+                  cursor: "pointer",
+                  "&:hover": {
+                    transform: "scale(1.3)", // Increase size on hover
+                    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.7)", // Stronger shadow on hover
+                    borderColor: "#FF8C00", // Dark orange border on hover
+                    backgroundColor: "#FFD700", // Gold background on hover
+                  },
+                }}
+              />
             </IconButton>
           </Tooltip>
-          <Menu
-            sx={{ mt: "45px" }}
-            id="menu-appbar"
-            anchorEl={anchorElUser}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            open={Boolean(anchorElUser)}
-            onClose={handleCloseUserMenu}
-          >
-            <MenuItem
-              onClick={() => {
-                navigate("/profile");
-                handleCloseUserMenu();
-              }}
-            >
-              <Typography textAlign="center">My Account</Typography>
-            </MenuItem>
-            <MenuItem onClick={() => setOpenDialog(true)}>
-              <Typography textAlign="center">Logout</Typography>
-            </MenuItem>
-          </Menu>
         </Box>
+
+        {/* User Menu */}
+        <Menu
+          sx={{ mt: "45px" }}
+          id="menu-appbar"
+          anchorEl={anchorElUser}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          open={Boolean(anchorElUser)}
+          onClose={handleCloseUserMenu}
+        >
+          <MenuItem
+            onClick={() => {
+              navigate("/profile");
+              handleCloseUserMenu();
+            }}
+          >
+            <Typography textAlign="center">My Account</Typography>
+          </MenuItem>
+          <MenuItem onClick={() => setOpenDialog(true)}>
+            <Typography textAlign="center">Logout</Typography>
+          </MenuItem>
+        </Menu>
       </Toolbar>
 
       {/* Logout Confirmation Dialog */}
