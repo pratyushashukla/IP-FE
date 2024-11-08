@@ -56,7 +56,7 @@ const Navbar = ({ selectedTab, onTabChange }) => {
   };
 
   return (
-    <AppBar position="fixed" sx={{ margin: 0 }}>
+    <AppBar position="static" sx={{ margin: 0 }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         {/* Clickable Logo - Redirects to Dashboard */}
         <NavLink to="/dashboard" style={{ display: "flex", alignItems: "center" }}>
