@@ -1,0 +1,1 @@
+export const MEALPLAN_DATA = "MEALPLAN_DATA";
