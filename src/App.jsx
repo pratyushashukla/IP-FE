@@ -18,6 +18,7 @@ import FormComponent from "./components/authentication/FormComponent";
 import Tasks from "./components/taskManagement/Tasks";
 import Visit from "./components/visit/Visit";
 import Inmates from "./components/inmates/Inmates";
+import Meal from "./components/mealManagement/Meal";
 
 function App() {
   return (
@@ -47,6 +48,10 @@ function App() {
             <Route
               path="/visit"
               element={<ProtectedRoutes Component={Visit} />}
+            />
+            <Route
+              path="/meal"
+              element={<ProtectedRoutes Component={Meal} />}
             />
             <Route path="/form" element={<FormComponent />} />
           </Routes>
