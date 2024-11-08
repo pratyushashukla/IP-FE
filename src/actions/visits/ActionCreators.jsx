@@ -28,9 +28,9 @@ export const ADD_VISIT = (visit, resetForm) => async (dispatch) => {
 };
 
 // Edit existing visit data
-export const EDIT_VISIT = (visit, handleUpdateModal) => async (dispatch) => {
+export const EDIT_VISIT = (id, visit, handleUpdateModal) => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.patch(`/appointments/${visit._id}`, visit);
+    const apiResponse = await ApiService.patch(`/appointments/${id}`, visit);
     if (apiResponse) {
       dispatch(GET_VISITS());
       handleUpdateModal();
