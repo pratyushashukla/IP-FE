@@ -13,7 +13,7 @@ const mealData = {
   allergies: "Peanuts"
 };
 
-const DownloadMeal = () => {
+const PreviewMealPlan = () => {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -24,34 +24,44 @@ const DownloadMeal = () => {
     setOpen(false);
   };
 
-  const generatePDF = async () => {
+  const handleDownload = async () => {
     const table = document.getElementById('mealPlanPreview');
     const canvas = await html2canvas(table);
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF(); // This should be replaced with response when backend api is ready
+    const pdf = new jsPDF();
 
-    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); //  positioning of table
+    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); // Adjust positioning if needed
 
-    // filename as per requirement
+    // Create the filename using inmate name and date
     const inmateName = mealData.inmateName.replace(" ", "");
     const startDate = mealData.startDate.replaceAll("-", "");
     const endDate = mealData.endDate.replaceAll("-", "");
     const fileName = `MealPlan_${inmateName}_${startDate}_${endDate}.pdf`;
 
     pdf.save(fileName);
+
+    // Call backend API 
+    // fetch('/api/downloadMealPlan', {
+    //   method: 'POST',
+    //   body: JSON.stringify(mealData),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // }).then(response => {
+    //   if (response.ok) {
+    //     console.log('API called successfully');
+    //   } else {
+    //     console.error('API call failed');
+    //   }
+    // });
   };
 
   return (
     <>
-      <Button variant="contained" color="primary" onClick={handleClickOpen} style={{ marginRight: '10px' }}>
+      <Button variant="contained" color="primary" onClick={handleClickOpen}>
         Preview
       </Button>
-      
-      <Button variant="contained" color="secondary" onClick={generatePDF}>
-        Download 
-      </Button>
 
-      {/* Preview Dialog */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>Meal Plan</DialogTitle>
         <DialogContent>
@@ -93,7 +103,7 @@ const DownloadMeal = () => {
           </TableContainer>
         </DialogContent>
         <DialogActions>
-          <Button onClick={generatePDF} color="primary" variant="contained">
+          <Button onClick={handleDownload} color="primary" variant="contained">
             Download
           </Button>
           <Button onClick={handleClose} color="secondary">
@@ -105,4 +115,4 @@ const DownloadMeal = () => {
   );
 };
 
-export default DownloadMeal;
+export default PreviewMealPlan;
