@@ -60,7 +60,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const ViewAppointments = ({ handleDetailsModal }) => {
+const ViewAppointments = ({ handleDetailsModal, handleUpdateModal }) => {
   const dispatch = useDispatch();
 
   const visitsData = useSelector((state) => state.VisitsReducer.visitsData);
@@ -114,6 +114,11 @@ const ViewAppointments = ({ handleDetailsModal }) => {
     setSelectedRow(null);
   };
 
+  const handleUpdate = () => {
+    handleCloseMenu();
+    handleUpdateModal(selectedRow);
+  };
+
   const handleDetails = () => {
     handleCloseMenu();
     handleDetailsModal(selectedRow);
@@ -135,7 +140,7 @@ const ViewAppointments = ({ handleDetailsModal }) => {
   return (
     <Box mt={4}>
       {/* Search Bar with Clear Functionality */}
-      <Box display="flex" gap={2} mb={2} alignItems="center">
+      <Box display="flex" gap={2} mb={2} alignItems="center" justifyContent={"center"}>
         <TextField
           label="Visitor Name"
           variant="outlined"
@@ -166,7 +171,7 @@ const ViewAppointments = ({ handleDetailsModal }) => {
           <IconButton
             color="secondary"
             onClick={handleClearSearch}
-            disabled={isAnyFieldActive ? false : true}
+            // disabled={isAnyFieldActive ? false : true}
           >
             <ClearIcon />
           </IconButton>
@@ -223,6 +228,9 @@ const ViewAppointments = ({ handleDetailsModal }) => {
         <List>
           <ListItem button onClick={handleDetails}>
             <ListItemText primary="Details" />
+          </ListItem>
+          <ListItem button onClick={handleUpdate}>
+            <ListItemText primary="Update" />
           </ListItem>
           <ListItem button onClick={handleDelete}>
             <ListItemText primary="Delete" />
