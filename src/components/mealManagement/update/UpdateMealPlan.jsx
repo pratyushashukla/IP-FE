@@ -14,8 +14,9 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AllergyDropdown from "../AllergyDropdown"; // Adjust the import path as needed
+import { UPDATE_MEALPLAN, GET_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
 
 // Utility function to format date
 const formatDate = (date) => {
@@ -25,7 +26,7 @@ const formatDate = (date) => {
 };
 
 const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUser }) => {
-  //const mealPlanData = useSelector((state) => state.MealPlanReducer.mealPlanData);
+  const dispatch = useDispatch();
   const mealPlanData = useSelector((state) => state.MealPlanReducer?.mealPlanData || []);
 
   const [mealPlan, setMealPlan] = useState({
@@ -40,6 +41,7 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
 
   useEffect(() => {
     if (selectedMealPlanId) {
+      dispatch(GET_MEALPLAN(selectedMealPlanId)); // Fetch the meal plan data if needed
       const selectedMealPlan = mealPlanData.find(
         (plan) => plan._id === selectedMealPlanId
       );
@@ -52,7 +54,7 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
         setInitialRepeat(selectedMealPlan.repeat || false); // Store initial repeat state
       }
     }
-  }, [selectedMealPlanId, mealPlanData]);
+  }, [selectedMealPlanId, mealPlanData, dispatch]);
 
   useEffect(() => {
     if (!mealPlan.repeat) {
@@ -79,7 +81,11 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
   };
 
   const handleUpdate = () => {
-    onUpdate(mealPlan);
+    dispatch(UPDATE_MEALPLAN(mealPlan, () => {
+      onUpdate();
+      onClose();
+      setInitialRepeat(mealPlan.repeat); // Update initial repeat state after update
+    }));
 
     // Trigger repeat logic only if the repeat field was updated
     if (mealPlan.repeat !== initialRepeat && mealPlan.repeat) {
@@ -97,7 +103,9 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
         startDate: new Date().toISOString(),
         dueDate: new Date(new Date().getTime() + duration).toISOString(),
       };
-      onUpdate(newMealPlan);
+      dispatch(UPDATE_MEALPLAN(newMealPlan, () => {
+        notifyUser("A new repeated meal plan has been created.");
+      }));
 
       // Restart the logic for continuous repetition
       startRepeatLogic();

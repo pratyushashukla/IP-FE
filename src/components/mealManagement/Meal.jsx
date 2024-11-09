@@ -6,17 +6,19 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useDispatch } from "react-redux";
 import { GET_INMATES } from "../../actions/inmates/ActionCreators";
+import { GET_MEALPLAN } from "../../actions/mealplan/ActionCreators";
 import { Grid } from "@mui/material";
 import MealPlan from "./MealPlan";
-import { GET_MEALPLAN } from "../../actions/mealplan/ActionCreators";
 
 function TabPanel(props) {
   const dispatch = useDispatch();
   const { children, value, index, ...other } = props;
 
   React.useEffect(() => {
-    dispatch(GET_INMATES());
-    dispatch(GET_MEALPLAN());
+    if (value === index) {
+      dispatch(GET_INMATES());
+      dispatch(GET_MEALPLAN());
+    }
   }, []);
 
   return (
@@ -77,7 +79,6 @@ export default function Meal() {
       >
         <Tabs
           orientation="vertical"
-          // variant="scrollable"
           value={value}
           onChange={handleChange}
           sx={{
@@ -93,14 +94,14 @@ export default function Meal() {
         </Tabs>
       </Box>
       <Grid container>
-      <Grid xs={1}></Grid>
-      <Grid xs={10}>
-      <TabPanel value={value} index={0}>
-        <MealPlan />
-      </TabPanel>
+        <Grid item xs={1}></Grid>
+        <Grid item xs={10}>
+          <TabPanel value={value} index={0}>
+            <MealPlan />
+          </TabPanel>
+        </Grid>
+        <Grid item xs={1}></Grid>
       </Grid>
-      <Grid xs={1}></Grid>
-    </Grid>
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { MEALPLAN_DATA } from "../actions/mealPlan/Types";
+import { MEALPLAN_DATA } from "../actions/mealplan/Types";
 
 const initialState = {
   mealPlanData: [],

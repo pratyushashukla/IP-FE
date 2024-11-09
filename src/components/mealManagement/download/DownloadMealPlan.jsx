@@ -1,20 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@mui/material';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { useDispatch } from 'react-redux';
+import { GET_MEALPLAN } from '../../../actions/mealplan/ActionCreators';
 
-// Replace this with API data when ready.
-const mealData = {
-  inmateName: "John Doe",
-  mealType: "Vegetarian",
-  startDate: "2024-11-01",
-  endDate: "2024-11-07",
-  dietaryPreferences: "No dairy",
-  allergies: "Peanuts"
-};
+const DownloadMealPlan = ({ selectedMealPlanId }) => {
+  const dispatch = useDispatch();
+  const [mealData, setMealData] = useState(null);
 
-const DownloadMealPlan = () => {
+  useEffect(() => {
+    if (selectedMealPlanId) {
+      // Fetch meal plan data using the API
+      dispatch(GET_MEALPLAN(selectedMealPlanId, (data) => {
+        setMealData(data);
+      }));
+    }
+  }, [selectedMealPlanId, dispatch]);
+
   const generatePDF = async () => {
+    if (!mealData) return;
+
     // Create a temporary table for generating the PDF
     const tableContainer = document.createElement('div');
     tableContainer.style.width = '100%';
@@ -48,9 +52,9 @@ const DownloadMealPlan = () => {
     pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); // Adjust positioning if needed
 
     // Create the filename using inmate name and date
-    const inmateName = mealData.inmateName.replace(" ", "");
-    const startDate = mealData.startDate.replaceAll("-", "");
-    const endDate = mealData.endDate.replaceAll("-", "");
+    const inmateName = mealData.inmateName.replace(/\s+/g, '');
+    const startDate = mealData.startDate.replaceAll('-', '');
+    const endDate = mealData.endDate.replaceAll('-', '');
     const fileName = `MealPlan_${inmateName}_${startDate}_${endDate}.pdf`;
 
     pdf.save(fileName);
@@ -60,7 +64,7 @@ const DownloadMealPlan = () => {
   };
 
   return (
-    <Button variant="contained" color="secondary" onClick={generatePDF}>
+    <Button variant="contained" color="secondary" onClick={generatePDF} disabled={!mealData}>
       Download
     </Button>
   );

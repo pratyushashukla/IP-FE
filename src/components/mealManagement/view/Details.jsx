@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -9,9 +9,10 @@ import {
   Paper,
   Typography,
   Box,
-  Button,
 } from "@mui/material";
 import { styled, tableCellClasses } from "@mui/material";
+import { useDispatch } from 'react-redux';
+import { GET_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
 
 // Styled components for custom styling
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -40,17 +41,23 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const mealPlanDetails = {
-  id: 1,
-  inmateName: "John Doe",
-  mealType: "Lunch",
-  startDate: "2024-11-01",
-  endDate: "2024-11-30",
-  dietaryPreference: "Low-carb",
-  allergies: ["Peanuts", "Dairy"],
-};
+const Details = ({ selectedMealPlanId }) => {
+  const [mealPlanDetails, setMealPlanDetails] = useState(null);
+  const dispatch = useDispatch();
 
-const Details = () => {
+  useEffect(() => {
+    if (selectedMealPlanId) {
+      // Fetch meal plan data using the API
+      dispatch(GET_MEALPLAN(selectedMealPlanId, (data) => {
+        setMealPlanDetails(data);
+      }));
+    }
+  }, [selectedMealPlanId, dispatch]);
+
+  if (!mealPlanDetails) {
+    return <Typography variant="h6" align="center">Loading...</Typography>;
+  }
+
   return (
     <Box mt={4} p={2}>
       <Typography variant="h4" align="center" gutterBottom>
@@ -92,11 +99,6 @@ const Details = () => {
           </TableBody>
         </Table>
       </StyledTableContainer>
-      <Box mt={2} display="flex" justifyContent="center">
-        <Button variant="contained" color="primary" onClick={() => alert('Navigate back to the list or other action')}>
-          Back to List
-        </Button>
-      </Box>
     </Box>
   );
 };

@@ -1,12 +1,18 @@
-// src/components/visitorManagement/Visitors.jsx
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import ViewMealPlan from "./view/ViewMealPlan";
-import { Toolbar, Button, Box, Typography } from "@mui/material";
-import CreateMealPlan from "./create/CreateMealPlan";
-import UpdateMealPlan from "./update/UpdateMealPlan";
-import { ADD_MEALPLAN, UPDATE_MEALPLAN, GET_MEALPLAN } from "../../actions/mealplan/ActionCreators";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  GET_MEALPLAN,
+  ADD_MEALPLAN,
+  UPDATE_MEALPLAN,
+  DELETE_MEALPLAN,
+  DOWNLOAD_MEALPLAN
+} from "../../actions/mealplan/ActionCreators";
 import { GET_INMATES } from "../../actions/inmates/ActionCreators";
+import { DataGrid } from '@mui/x-data-grid';
+import { Toolbar, Button, Box, Typography } from "@mui/material";
+import CreateMealPlan from '../mealManagement/create/CreateMealPlan';  
+import UpdateMealPlan from '../mealManagement/update/UpdateMealPlan'; 
+import ViewMealPlan from '../mealManagement/view/ViewMealPlan'; 
 
 function MealPlan() {
   const dispatch = useDispatch();
@@ -16,8 +22,8 @@ function MealPlan() {
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
 
   const handleCreateModal = () => setCreateModal(!createModal);
-  const handleUpdateModal = (mealplanId = 0) => {
-    setSelectedMealPlanId(mealplanId);
+  const handleUpdateModal = (mealPlanId = 0) => {
+    setSelectedMealPlanId(mealPlanId);
     setUpdateModal(!updateModal);
   };
 
@@ -42,12 +48,12 @@ function MealPlan() {
         gutterBottom
         sx={{ mt: 4, fontWeight: "bold" }}
       >
-        MealPlan Management
+       Meal Management
       </Typography>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Box flexGrow={1} />
         <Button variant="contained" color="primary" onClick={handleCreateModal}>
-          Add MealPlan
+          Add Meal Plan
         </Button>
       </Toolbar>
       <ViewMealPlan handleUpdateModal={handleUpdateModal} />
@@ -65,7 +71,7 @@ function MealPlan() {
           open={updateModal}
           onClose={handleUpdateModal}
           onUpdate={handleUpdateMealPlan}
-          selectedMealPlanId={selectedMealPlanId}
+          selectedVisitorId={selectedVisitorId}
         />
       )}
     </div>
@@ -73,3 +79,4 @@ function MealPlan() {
 }
 
 export default MealPlan;
+

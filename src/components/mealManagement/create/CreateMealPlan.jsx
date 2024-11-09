@@ -14,10 +14,16 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { useSelector } from "react-redux";
-import AllergyDropdown from "../AllergyDropdown"; // Adjust the import path as needed
+import { useDispatch, useSelector } from "react-redux";
+import AllergyDropdown from "../AllergyDropdown"; 
+import {
+  ADD_MEALPLAN,
+  GET_MEALPLAN,
+} from "../../../actions/mealplan/ActionCreators";
+import { GET_INMATES } from "../../../actions/inmates/ActionCreators";
 
-const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
+export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
+  const dispatch = useDispatch();
   const [mealPlan, setMealPlan] = useState({
     inmate: "", // Field for the selected inmate ID
     mealType: "Vegeterian", // Default value for the meal type
@@ -27,7 +33,11 @@ const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
     repeat: false, // UI-only field to indicate if the plan should repeat
   });
 
-  const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
+  const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData || []);
+
+  useEffect(() => {
+    dispatch(GET_INMATES()); // Fetch inmates data on component mount
+  }, [dispatch]);
 
   useEffect(() => {
     if (!mealPlan.repeat) {
@@ -61,7 +71,20 @@ const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
   };
 
   const handleCreate = () => {
-    onCreate(mealPlan);
+    console.log("Create button clicked");
+    dispatch(ADD_MEALPLAN(mealPlan, () => {
+      onCreate();
+      dispatch(GET_MEALPLAN(1, 10)); // Refresh meal plans after creation
+      onClose();
+      setMealPlan({
+        inmate: "",
+        mealType: "Vegeterian",
+        mealPlanDuration: "Monthly",
+        allergy: [],
+        dietaryPreference: "",
+        repeat: false,
+      });
+    }));
     if (mealPlan.repeat) {
       startRepeatLogic();
     }
@@ -77,7 +100,9 @@ const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
         startDate: new Date().toISOString(),
         dueDate: new Date(new Date().getTime() + duration).toISOString(),
       };
-      onCreate(newMealPlan);
+      dispatch(ADD_MEALPLAN(newMealPlan, () => {
+        dispatch(GET_MEALPLAN(1, 10)); // Refresh meal plans after repeat logic
+      }));
 
       // Restart the logic for continuous repetition
       startRepeatLogic();
