@@ -126,7 +126,7 @@ const ViewVisitor = ({ handleUpdateModal }) => {
   return (
     <Box mt={4}>
       {/* Search Bar with Clear Functionality */}
-      <Box display="flex" gap={2} mb={2} alignItems="center">
+      <Box display="flex" gap={2} mb={2} alignItems="center" justifyContent={"center"}>
         <TextField
           label="Visitor Name"
           variant="outlined"
