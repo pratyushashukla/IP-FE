@@ -1,17 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { GET_MEALPLAN } from '../../../actions/mealplan/ActionCreators';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const DownloadMealPlan = ({ selectedMealPlanId }) => {
   const dispatch = useDispatch();
   const [mealData, setMealData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (selectedMealPlanId) {
-      // Fetch meal plan data using the API
+      setLoading(true);
       dispatch(GET_MEALPLAN(selectedMealPlanId, (data) => {
-        setMealData(data);
+        setLoading(false);
+        if (data) {
+          setMealData(data);
+        } else {
+          setError('Failed to fetch meal plan data.');
+        }
       }));
     }
   }, [selectedMealPlanId, dispatch]);
@@ -19,11 +28,8 @@ const DownloadMealPlan = ({ selectedMealPlanId }) => {
   const generatePDF = async () => {
     if (!mealData) return;
 
-    // Create a temporary table for generating the PDF
     const tableContainer = document.createElement('div');
-    tableContainer.style.width = '100%';
-    tableContainer.style.padding = '20px';
-    tableContainer.innerHTML = `
+    const table = `
       <table border="1" style="width: 100%; border-collapse: collapse;">
         <thead>
           <tr>
@@ -41,7 +47,7 @@ const DownloadMealPlan = ({ selectedMealPlanId }) => {
         </tbody>
       </table>
     `;
-
+    tableContainer.innerHTML = table;
     document.body.appendChild(tableContainer);
 
     // Convert the table to canvas
@@ -49,9 +55,8 @@ const DownloadMealPlan = ({ selectedMealPlanId }) => {
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF();
 
-    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); // Adjust positioning if needed
+    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
 
-    // Create the filename using inmate name and date
     const inmateName = mealData.inmateName.replace(/\s+/g, '');
     const startDate = mealData.startDate.replaceAll('-', '');
     const endDate = mealData.endDate.replaceAll('-', '');
@@ -59,14 +64,23 @@ const DownloadMealPlan = ({ selectedMealPlanId }) => {
 
     pdf.save(fileName);
 
-    // Clean up
     document.body.removeChild(tableContainer);
   };
 
   return (
-    <Button variant="contained" color="secondary" onClick={generatePDF} disabled={!mealData}>
-      Download
-    </Button>
+    <>
+      {error && <Typography color="error">{error}</Typography>}
+      {loading && <Typography variant="body2">Loading meal plan...</Typography>}
+
+      <Button 
+        variant="contained" 
+        color="secondary" 
+        onClick={generatePDF} 
+        disabled={!mealData || loading}
+      >
+        Download
+      </Button>
+    </>
   );
 };
 

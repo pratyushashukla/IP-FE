@@ -11,8 +11,6 @@ import {
   FormLabel,
   Box,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import AllergyDropdown from "../AllergyDropdown"; 
@@ -22,15 +20,14 @@ import {
 } from "../../../actions/mealplan/ActionCreators";
 import { GET_INMATES } from "../../../actions/inmates/ActionCreators";
 
-export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
+export const CreateMealPlan = ({ open, onClose, onCreate }) => {
   const dispatch = useDispatch();
   const [mealPlan, setMealPlan] = useState({
-    inmate: "", // Field for the selected inmate ID
-    mealType: "Vegeterian", // Default value for the meal type
-    mealPlanDuration: "Monthly", // Default value for the meal plan duration
+    inmateId: "", // Field for the selected inmate ID
+    mealType: "Vegetarian", // Default value for the meal type
+    mealPlan: "Monthly", // Default value for the meal plan duration
     allergy: [], // Field for the selected allergies
     dietaryPreference: "",
-    repeat: false, // UI-only field to indicate if the plan should repeat
   });
 
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData || []);
@@ -38,12 +35,6 @@ export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
   useEffect(() => {
     dispatch(GET_INMATES()); // Fetch inmates data on component mount
   }, [dispatch]);
-
-  useEffect(() => {
-    if (!mealPlan.repeat) {
-      scheduleNotification();
-    }
-  }, [mealPlan]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -60,16 +51,6 @@ export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
     });
   };
 
-  const scheduleNotification = () => {
-    const duration = mealPlan.mealPlanDuration === "Monthly" ? 25 : 5; // 25th of the month or 5th day of the week
-    const today = new Date().getDate();
-
-    if ((mealPlan.mealPlanDuration === "Monthly" && today >= 25) ||
-        (mealPlan.mealPlanDuration === "Weekly" && today >= 5)) {
-      notifyUser("Your meal plan is about to end. Please renew or update.");
-    }
-  };
-
   const handleCreate = () => {
     console.log("Create button clicked");
     dispatch(ADD_MEALPLAN(mealPlan, () => {
@@ -77,36 +58,13 @@ export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
       dispatch(GET_MEALPLAN(1, 10)); // Refresh meal plans after creation
       onClose();
       setMealPlan({
-        inmate: "",
-        mealType: "Vegeterian",
-        mealPlanDuration: "Monthly",
+        inmateId: "",
+        mealType: "Vegetarian",
+        mealPlan: "Monthly",
         allergy: [],
         dietaryPreference: "",
-        repeat: false,
       });
     }));
-    if (mealPlan.repeat) {
-      startRepeatLogic();
-    }
-  };
-
-  const startRepeatLogic = () => {
-    const duration = mealPlan.mealPlanDuration === "Monthly" ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000; // Milliseconds for month or week
-
-    setTimeout(() => {
-      // Automatically create a new meal plan
-      const newMealPlan = {
-        ...mealPlan,
-        startDate: new Date().toISOString(),
-        dueDate: new Date(new Date().getTime() + duration).toISOString(),
-      };
-      dispatch(ADD_MEALPLAN(newMealPlan, () => {
-        dispatch(GET_MEALPLAN(1, 10)); // Refresh meal plans after repeat logic
-      }));
-
-      // Restart the logic for continuous repetition
-      startRepeatLogic();
-    }, duration);
   };
 
   return (
@@ -122,9 +80,9 @@ export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
                   Inmate
                 </FormLabel>
                 <TextField
-                  id="inmate"
-                  name="inmate"
-                  value={mealPlan.inmate}
+                  id="inmateId"
+                  name="inmateId"
+                  value={mealPlan.inmateId}
                   onChange={handleInputChange}
                   select
                   variant="outlined"
@@ -154,7 +112,7 @@ export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
                   variant="outlined"
                   required
                 >
-                  <MenuItem value="Vegeterian">Vegeterian</MenuItem>
+                  <MenuItem value="Vegetarian">Vegetarian</MenuItem>
                   <MenuItem value="Halal">Halal</MenuItem>
                   <MenuItem value="Non-Veg">Non-Veg</MenuItem>
                   <MenuItem value="Vegan">Vegan</MenuItem>
@@ -165,13 +123,13 @@ export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
             {/* Meal Plan Duration Field */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="mealPlanDuration" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel htmlFor="mealPlan" sx={{ mb: 1, fontWeight: "bold" }}>
                   Meal Plan
                 </FormLabel>
                 <TextField
-                  id="mealPlanDuration"
-                  name="mealPlanDuration"
-                  value={mealPlan.mealPlanDuration}
+                  id="mealPlan"
+                  name="mealPlan"
+                  value={mealPlan.mealPlan}
                   onChange={handleInputChange}
                   select
                   variant="outlined"
@@ -210,20 +168,6 @@ export const CreateMealPlan = ({ open, onClose, onCreate, notifyUser }) => {
                   variant="outlined"
                 />
               </FormControl>
-            </Grid>
-
-            {/* Repeat Checkbox Field */}
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={mealPlan.repeat}
-                    onChange={handleInputChange}
-                    name="repeat"
-                  />
-                }
-                label="Repeat"
-              />
             </Grid>
           </Grid>
         </Box>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Autocomplete,
   TextField,
@@ -13,25 +13,43 @@ import {
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useDispatch, useSelector } from "react-redux";
-import { GET_ALLERGIES, ADD_ALLERGY } from "../../actions/allergies/ActionCreators"; 
+import { GET_ALLERGIES, ADD_ALLERGY } from "../../actions/allergies/ActionCreators";
+import { createSelector } from 'reselect';
 
+const selectAllergiesState = (state) => state.allergiesData || [];
+
+// Memoized selector for allergies
+const selectAllergies = createSelector(
+  [selectAllergiesState],
+  (allergies) => allergies
+);
 const AllergyDropdown = ({ value, onChange }) => {
   const dispatch = useDispatch();
-  const allergies = useSelector((state) => state.allergiesData || []); // Ensure this matches your Redux state
+  const allergies = useSelector(selectAllergies); // Use the memoized selector
 
   const [selectedAllergies, setSelectedAllergies] = useState(value || []);
   const [openDialog, setOpenDialog] = useState(false);
   const [newAllergy, setNewAllergy] = useState("");
   const [newAllergyDescription, setNewAllergyDescription] = useState("");
 
+  const dialogRef = useRef(null);
+  const firstInputRef = useRef(null);
+
   useEffect(() => {
     dispatch(GET_ALLERGIES()); // Dispatch action to fetch allergies when component mounts
   }, [dispatch]);
 
+  useEffect(() => {
+    if (openDialog) {
+      // Focus the first input field in the dialog when it opens
+      firstInputRef.current?.focus();
+    }
+  }, [openDialog]);
+
   // API call to create a new allergy
   const handleCreateAllergy = async () => {
     const newAllergyObject = {
-      title: newAllergy,
+      allergyName: newAllergy,
       description: newAllergyDescription,
     };
 
@@ -57,6 +75,14 @@ const AllergyDropdown = ({ value, onChange }) => {
     } else {
       setSelectedAllergies(newValue);
       onChange(newValue);
+    }
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    // Optionally return focus to the element that had focus before the dialog was opened
+    if (dialogRef.current) {
+      dialogRef.current.removeAttribute("inert"); // Remove inert on dialog close
     }
   };
 
@@ -95,12 +121,16 @@ const AllergyDropdown = ({ value, onChange }) => {
       />
 
       <Dialog
+        ref={dialogRef}
         open={openDialog}
-        onClose={() => setOpenDialog(false)}
+        onClose={handleDialogClose}
         maxWidth="sm"
         fullWidth
+        aria-labelledby="create-new-allergy-title"
+        aria-describedby="create-new-allergy-description"
+        onBackdropClick={handleDialogClose} // Optional: Close on backdrop click
       >
-        <DialogTitle>Create New Allergy</DialogTitle>
+        <DialogTitle id="create-new-allergy-title">Create New Allergy</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -111,6 +141,7 @@ const AllergyDropdown = ({ value, onChange }) => {
             value={newAllergy}
             onChange={(e) => setNewAllergy(e.target.value)}
             variant="outlined"
+            inputRef={firstInputRef} // Reference for focusing the first input field
           />
           <TextField
             margin="dense"
@@ -125,7 +156,7 @@ const AllergyDropdown = ({ value, onChange }) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">
+          <Button onClick={handleDialogClose} color="secondary">
             Cancel
           </Button>
           <Button

@@ -11,123 +11,81 @@ import {
   FormLabel,
   Box,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
+  Typography,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import AllergyDropdown from "../AllergyDropdown"; // Adjust the import path as needed
+import AllergyDropdown from "../AllergyDropdown"; 
 import { UPDATE_MEALPLAN, GET_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
 
-// Utility function to format date
-const formatDate = (date) => {
-  if (!date) return "";
-  const d = new Date(date);
-  return d.toISOString().split("T")[0]; // Format to YYYY-MM-DD
-};
-
-const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUser }) => {
+const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
   const dispatch = useDispatch();
-  const mealPlanData = useSelector((state) => state.MealPlanReducer?.mealPlanData || []);
-
   const [mealPlan, setMealPlan] = useState({
-    inmate: "", // Read-only field populated from existing data
+    inmateId: "", // Read-only field populated from existing data
     mealType: "",
-    mealPlanDuration: "",
+    mealPlan: "",
     allergy: [],
-    dietaryPreference: "",
-    repeat: false, // UI-only field to indicate if the plan should repeat
+    dietaryPreferences: "",
   });
-  const [initialRepeat, setInitialRepeat] = useState(false); // Track initial repeat state
+  const [error, setError] = useState(null); // Error state
 
+  // Fetch meal plan data if not already available in Redux store
   useEffect(() => {
     if (selectedMealPlanId) {
-      dispatch(GET_MEALPLAN(selectedMealPlanId)); // Fetch the meal plan data if needed
-      const selectedMealPlan = mealPlanData.find(
-        (plan) => plan._id === selectedMealPlanId
+      dispatch(
+        GET_MEALPLAN(selectedMealPlanId, (data) => {
+          if (data) {
+            setMealPlan({
+              ...data,
+              inmateId: data.inmate._id, // Set inmate ID as readonly field
+            });
+          } else {
+            setError("Meal plan data not found.");
+          }
+        })
       );
-      if (selectedMealPlan) {
-        setMealPlan({
-          ...selectedMealPlan,
-          inmate: selectedMealPlan.inmate._id, // Set inmate ID as readonly field
-          repeat: selectedMealPlan.repeat || false,
-        });
-        setInitialRepeat(selectedMealPlan.repeat || false); // Store initial repeat state
-      }
     }
-  }, [selectedMealPlanId, mealPlanData, dispatch]);
-
-  useEffect(() => {
-    if (!mealPlan.repeat) {
-      scheduleNotification();
-    }
-  }, [mealPlan]);
+  }, [selectedMealPlanId, dispatch]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setMealPlan((prevMealPlan) => ({
       ...prevMealPlan,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
-  };
-
-  const scheduleNotification = () => {
-    const duration = mealPlan.mealPlanDuration === "Monthly" ? 25 : 5; // 25th of the month or 5th day of the week
-    const today = new Date().getDate();
-
-    if ((mealPlan.mealPlanDuration === "Monthly" && today >= 25) ||
-        (mealPlan.mealPlanDuration === "Weekly" && today >= 5)) {
-      notifyUser("Your meal plan is about to end. Please renew or update.");
-    }
   };
 
   const handleUpdate = () => {
-    dispatch(UPDATE_MEALPLAN(mealPlan, () => {
-      onUpdate();
-      onClose();
-      setInitialRepeat(mealPlan.repeat); // Update initial repeat state after update
-    }));
-
-    // Trigger repeat logic only if the repeat field was updated
-    if (mealPlan.repeat !== initialRepeat && mealPlan.repeat) {
-      startRepeatLogic();
+    if (mealPlan.mealType && mealPlan.mealPlan) {
+      dispatch(
+        UPDATE_MEALPLAN(mealPlan, () => {
+          onUpdate(); // Callback after update
+          onClose();  // Close the dialog
+        })
+      );
+    } else {
+      setError("Please fill in all required fields.");
     }
   };
 
-  const startRepeatLogic = () => {
-    const duration = mealPlan.mealPlanDuration === "Monthly" ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000; // Milliseconds for month or week
-
-    setTimeout(() => {
-      // Automatically create a new meal plan
-      const newMealPlan = {
-        ...mealPlan,
-        startDate: new Date().toISOString(),
-        dueDate: new Date(new Date().getTime() + duration).toISOString(),
-      };
-      dispatch(UPDATE_MEALPLAN(newMealPlan, () => {
-        notifyUser("A new repeated meal plan has been created.");
-      }));
-
-      // Restart the logic for continuous repetition
-      startRepeatLogic();
-    }, duration);
-  };
+  const isFormValid = mealPlan.mealType && mealPlan.mealPlan;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Update Meal Plan</DialogTitle>
       <DialogContent>
+        {error && <Typography color="error">{error}</Typography>} {/* Display error if any */}
         <Box>
           <Grid container spacing={2}>
             {/* Inmate Field (Read-only) */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="inmate" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel htmlFor="inmateId" sx={{ mb: 1, fontWeight: "bold" }}>
                   Inmate
                 </FormLabel>
                 <TextField
-                  id="inmate"
-                  name="inmate"
-                  value={mealPlan.inmate}
+                  id="inmateId"
+                  name="inmateId"
+                  value={mealPlan.inmateId}
                   variant="outlined"
                   InputProps={{
                     readOnly: true,
@@ -151,7 +109,7 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
                   variant="outlined"
                   required
                 >
-                  <MenuItem value="Vegeterian">Vegeterian</MenuItem>
+                  <MenuItem value="Vegetarian">Vegetarian</MenuItem>
                   <MenuItem value="Halal">Halal</MenuItem>
                   <MenuItem value="Non-Veg">Non-Veg</MenuItem>
                   <MenuItem value="Vegan">Vegan</MenuItem>
@@ -162,13 +120,13 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
             {/* Meal Plan Duration Field */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="mealPlanDuration" sx={{ mb: 1, fontWeight: "bold" }}>
+                <FormLabel htmlFor="mealPlan" sx={{ mb: 1, fontWeight: "bold" }}>
                   Meal Plan Duration
                 </FormLabel>
                 <TextField
-                  id="mealPlanDuration"
-                  name="mealPlanDuration"
-                  value={mealPlan.mealPlanDuration}
+                  id="mealPlan"
+                  name="mealPlan"
+                  value={mealPlan.mealPlan}
                   onChange={handleInputChange}
                   select
                   variant="outlined"
@@ -202,27 +160,13 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
                   Dietary Preference
                 </FormLabel>
                 <TextField
-                  id="dietaryPreference"
-                  name="dietaryPreference"
-                  value={mealPlan.dietaryPreference}
+                  id="dietaryPreferences"
+                  name="dietaryPreferences"
+                  value={mealPlan.dietaryPreferences}
                   onChange={handleInputChange}
                   variant="outlined"
                 />
               </FormControl>
-            </Grid>
-
-            {/* Repeat Checkbox Field */}
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={mealPlan.repeat}
-                    onChange={handleInputChange}
-                    name="repeat"
-                  />
-                }
-                label="Repeat"
-              />
             </Grid>
           </Grid>
         </Box>
@@ -237,6 +181,7 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId, notifyUse
           onClick={handleUpdate}
           variant="contained"
           color="primary"
+          disabled={!isFormValid}
         >
           Update
         </Button>

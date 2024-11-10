@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { GET_MEALPLAN } from '../../../actions/mealplan/ActionCreators';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const PreviewMealPlan = ({ selectedMealPlanId }) => {
   const [open, setOpen] = useState(false);
   const [mealData, setMealData] = useState(null);
+  const [error, setError] = useState(null);  // Error state
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (selectedMealPlanId) {
-      // Fetch meal plan data using the API
+      console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
       dispatch(GET_MEALPLAN(selectedMealPlanId, (data) => {
-        setMealData(data);
+        if (data) {
+          console.log("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+          setMealData(data);
+        } else {
+          console.log("pppppppppppppppppppppppppppppppppppppppppppppppppp");
+          setError('Meal plan data not found.');
+        }
       }));
     }
   }, [selectedMealPlanId, dispatch]);
@@ -27,6 +36,7 @@ const PreviewMealPlan = ({ selectedMealPlanId }) => {
 
   const handleDownload = async () => {
     if (!mealData) return;
+    console.log("00000000000000000000000000000000000000000000000");
 
     const table = document.getElementById('mealPlanPreview');
     const canvas = await html2canvas(table);
@@ -35,11 +45,8 @@ const PreviewMealPlan = ({ selectedMealPlanId }) => {
 
     pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); // Adjust positioning if needed
 
-    // Create the filename using inmate name and date
     const inmateName = mealData.inmateName.replace(/\s+/g, '');
-    const startDate = mealData.startDate.replaceAll('-', '');
-    const endDate = mealData.endDate.replaceAll('-', '');
-    const fileName = `MealPlan_${inmateName}_${startDate}_${endDate}.pdf`;
+    const fileName = `MealPlan_${inmateName}.pdf`;
 
     pdf.save(fileName);
   };
@@ -53,46 +60,43 @@ const PreviewMealPlan = ({ selectedMealPlanId }) => {
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>Meal Plan</DialogTitle>
         <DialogContent>
-          <TableContainer component={Paper} id="mealPlanPreview" style={{ width: '100%' }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell><strong>Detail</strong></TableCell>
-                  <TableCell><strong>Information</strong></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {mealData && (
-                  <>
-                    <TableRow>
-                      <TableCell>Inmate Name</TableCell>
-                      <TableCell>{mealData.inmateName}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Meal Type</TableCell>
-                      <TableCell>{mealData.mealType}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Start Date</TableCell>
-                      <TableCell>{mealData.startDate}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>End Date</TableCell>
-                      <TableCell>{mealData.endDate}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Dietary Preferences</TableCell>
-                      <TableCell>{mealData.dietaryPreferences}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Allergies</TableCell>
-                      <TableCell>{mealData.allergies}</TableCell>
-                    </TableRow>
-                  </>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          {error && <Typography color="error">{error}</Typography>}
+          {!mealData ? (
+            <Typography variant="body2">Loading meal plan data...</Typography>
+          ) : (
+            <TableContainer component={Paper} id="mealPlanPreview" style={{ width: '100%' }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell component="th" scope="col"><strong>Detail</strong></TableCell>
+                    <TableCell component="th" scope="col"><strong>Information</strong></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Inmate Name</TableCell>
+                    <TableCell>{mealData.inmateName}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Meal Type</TableCell>
+                    <TableCell>{mealData.mealType}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Meal Plan</TableCell>
+                    <TableCell>{mealData.mealPlan}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Dietary Preferences</TableCell>
+                    <TableCell>{mealData.dietaryPreferences}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Allergies</TableCell>
+                    <TableCell>{mealData.allergyId}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDownload} color="primary" variant="contained" disabled={!mealData}>
