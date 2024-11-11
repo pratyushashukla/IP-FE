@@ -9,15 +9,12 @@ import {
   TextField,
   Grid,
   Link as MuiLink,
-  MenuItem,
   Button,
   Alert,
   Card as MuiCard,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
-
 import { styled } from "@mui/material/styles";
-
 import ForgotPassword from "./ForgotPassword";
 import { SitemarkIcon } from "./CustomIcons";
 import { useDispatch } from "react-redux";
@@ -47,6 +44,7 @@ export default function SignInCard() {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [serverError, setServerError] = React.useState(""); // State to handle server error messages
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -58,21 +56,6 @@ export default function SignInCard() {
 
   const handleClose = () => {
     setOpen(false);
-  };
-
-  const handleSubmit = (event) => {
-    if (!emailError || !passwordError) {
-      event.preventDefault();
-      const data = new FormData(event.currentTarget);
-      const obj = Object.fromEntries(data);
-      for (const key in obj) {
-        let trimmedValue = obj[key].trim();
-        if (trimmedValue.length === 0) {
-          delete obj[key];
-        }
-      }
-      dispatch(LOGIN(obj, formRef, navigate));
-    }
   };
 
   const validateInputs = () => {
@@ -102,6 +85,38 @@ export default function SignInCard() {
     return isValid;
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const isValid = validateInputs();
+
+    if (isValid) {
+      const data = new FormData(event.currentTarget);
+      const obj = Object.fromEntries(data);
+
+      for (const key in obj) {
+        let trimmedValue = obj[key].trim();
+        if (trimmedValue.length === 0) {
+          delete obj[key];
+        }
+      }
+
+      try {
+        // Dispatch the LOGIN action and await the response
+        const response = await dispatch(LOGIN(obj, formRef, navigate));
+        
+        // Assuming the response contains a property `error` when login fails
+        if (response.error) {
+          setServerError(response.error); // Set the server error message
+        } else {
+          setServerError(""); // Clear any previous server error message
+        }
+      } catch (error) {
+        // Handle unexpected errors, if any
+        setServerError("Invalid E-mail or Password.");
+      }
+    }
+  };
+
   return (
     <Card variant="outlined">
       <Box sx={{ display: { xs: "flex", md: "none" } }}>
@@ -114,6 +129,11 @@ export default function SignInCard() {
       >
         Sign in
       </Typography>
+      {serverError && (
+        <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
+          {serverError}
+        </Alert>
+      )}
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -166,16 +186,11 @@ export default function SignInCard() {
             color={passwordError ? "error" : "primary"}
           />
         </FormControl>
-        {/* <FormControlLabel
-          control={<Checkbox value="remember" color="primary" />}
-          label="Remember me"
-        /> */}
         <ForgotPassword open={open} handleClose={handleClose} />
         <Button
           type="submit"
           fullWidth
           variant="contained"
-          onClick={validateInputs}
         >
           Sign in
         </Button>
