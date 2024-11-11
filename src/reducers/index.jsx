@@ -5,6 +5,8 @@ import TasksReducer from "./TasksReducer";
 import InmatesReducer from "./InmatesReducer";
 import VisitorsReducer from "./VisitorsReducer";
 import VisitsReducer from "./VisitsReducer";
+import MealPlanReducer from "./MealPlanReducer";
+import AllergiesReducer from "./AllergiesReducer";
 
 export default combineReducers({
   GeneralReducer: GeneralReducer,
@@ -12,5 +14,8 @@ export default combineReducers({
   TasksReducer: TasksReducer,
   InmatesReducer: InmatesReducer,
   VisitorsReducer: VisitorsReducer,
-  VisitsReducer: VisitsReducer
+  VisitsReducer: VisitsReducer,
+  MealPlanReducer: MealPlanReducer,
+  AllergiesReducer: AllergiesReducer,
+
 });

@@ -1,0 +1,58 @@
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { GET_ALLERGIES } from '../../../actions/allergies/ActionCreators'; 
+import { TableCell, styled, tableCellClasses } from "@mui/material";
+
+// Styled TableCell Component
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+// Function to map allergyIds to names
+const getAllergyNamesFromIds = (allergyIds, allergies) => {
+  if (!allergyIds || allergies.length === 0) return [];
+  
+  return allergyIds.map(id => {
+    const allergy = allergies.find(allergy => allergy._id === id);
+    return allergy ? allergy.name : "Unknown Allergy";
+  });
+};
+
+const MealPlanAllergyCell = ({ mealPlan }) => {
+  const dispatch = useDispatch();
+  
+  // Retrieve allergies from Redux store
+  const allergies = useSelector(state => state.allergies.allergies); // Assuming allergies are stored here
+  
+  // State to store the allergy names for this specific meal plan
+  const [allergyNames, setAllergyNames] = useState([]);
+
+  useEffect(() => {
+    // Fetch allergies if they are not already in the store
+    if (allergies.length === 0) {
+      dispatch(GET_ALLERGIES());
+    }
+  }, [dispatch, allergies]);
+
+  useEffect(() => {
+    // Get the allergy names based on the mealPlan.allergyId
+    if (mealPlan.allergyId) {
+      const names = getAllergyNamesFromIds(mealPlan.allergyId, allergies);
+      setAllergyNames(names);
+    }
+  }, [allergies, mealPlan.allergyId]);
+
+  return (
+    <StyledTableCell>
+      {allergyNames.length > 0 ? allergyNames.join(', ') : "N/A"}
+    </StyledTableCell>
+  );
+};
+
+export default MealPlanAllergyCell;
