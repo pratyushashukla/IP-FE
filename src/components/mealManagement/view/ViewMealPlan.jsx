@@ -88,10 +88,13 @@ const ViewMealPlan = () => {
     }
   };
 
-  const handleSendEmail = () => {
+  const handleSendEmail = (id, email) => {
     console.log("handleSendEmail called"); 
-    if (selectedMealPlan && selectedMealPlan._id && email) {
-      dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email))
+    console.log("Id: " + id); 
+    console.log("Email: " + email);
+    
+    if (id && email) {
+      dispatch(EMAIL_MEALPLAN(id, email))
         .then(() => {
           alert(`Email sent to: ${email}`);
           handleCloseDialog();
@@ -101,9 +104,11 @@ const ViewMealPlan = () => {
           console.error("Failed to send email:", error);
           alert("Failed to send email. Please try again.");
         });
+    } else {
+      console.error("ID or email is missing.");
+      alert("Please provide a valid ID and email address.");
     }
   };
-  
 
   return (
     <Box mt={4}>
@@ -189,7 +194,12 @@ const ViewMealPlan = () => {
                     >
                       Download
                     </Button>
-                    <Button variant="contained" color="primary" onClick={() => handleOpenDialog("email")}>
+                    <Button variant="contained" color="primary" 
+                    onClick={() => {
+                      setSelectedMealPlan(mealPlan);
+                      handleOpenDialog("email");
+                      }}
+                    >
                       Email
                     </Button>
                   </Stack>
@@ -199,7 +209,6 @@ const ViewMealPlan = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
       {/* Dialog for Email */}
       <Dialog open={Boolean(dialogType === "email")} onClose={handleCloseDialog} fullWidth maxWidth="md">
         <DialogTitle>Send Email</DialogTitle>
@@ -218,10 +227,15 @@ const ViewMealPlan = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
-          <Button onClick={handleSendEmail} color="primary">Send</Button>
+            {/* Pass selectedMealPlan._id and email to handleSendEmail */}
+          <Button
+            onClick={() => handleSendEmail(selectedMealPlan._id, email)}
+            color="primary"
+          >
+            Send
+          </Button>
         </DialogActions>
       </Dialog>
-
       {/* Delete Confirmation Dialog */}
       {dialogType === "delete" && (
         <Dialog open={true} onClose={handleCloseDialog}>

@@ -6,7 +6,7 @@ import { ERRORMSG, SUCCESSMSG } from "./Actions";
 
 export const SIGNUP = (obj, formRef, navigate) => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.post(`/auth/signup`, { data: obj });
+    const apiResponse = await ApiService.post(`/auth/signup`, obj );
     if (apiResponse.status == 200) {
       formRef.current.reset();
       dispatchApiMessage(dispatch, SUCCESSMSG, apiResponse.data.message);
