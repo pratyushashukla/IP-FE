@@ -29,7 +29,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useDispatch, useSelector } from "react-redux";
-import { GET_MEALPLAN, DELETE_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
+import { GET_MEALPLAN, DELETE_MEALPLAN , EMAIL_MEALPLAN} from "../../../actions/mealplan/ActionCreators";
 import { GET_ALLERGIES } from "../../../actions/allergies/ActionCreators";
 import UpdateMealPlan from "../update/UpdateMealPlan";
 import Details from "../view/Details";
@@ -89,10 +89,17 @@ const ViewMealPlan = () => {
   };
 
   const handleSendEmail = () => {
-    console.log("Email sent to:", email);
-    handleCloseDialog();
-    setEmail("");
-} ;
+    if (selectedMealPlan && email) {
+      // Dispatch EMAIL_MEALPLAN action, passing selectedMealPlan ID and email
+      dispatch(
+        EMAIL_MEALPLAN(selectedMealPlan._id, email, () => {
+          console.log("Email sent to:", email);
+          handleCloseDialog();
+          setEmail("");
+        })
+      );
+    }
+  };
 
 
   return (
