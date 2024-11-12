@@ -21,8 +21,8 @@ import { jsPDF } from 'jspdf';
 const PreviewMealPlan = ({ open, onClose, selectedMealPlanId }) => {
   const mealPlanData = useSelector((state) => state.MealPlanReducer.mealPlanData);
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
+  const allergiesData = useSelector((state) => state.AllergiesReducer.allergiesData || []);
 
-  console.log("ooooooooooooooooooo = " + selectedMealPlanId);
   const [mealPlanDetails, setMealPlanDetails] = useState({
     inmateId: "",
     mealType: "",
@@ -32,6 +32,15 @@ const PreviewMealPlan = ({ open, onClose, selectedMealPlanId }) => {
   });
   const [inmateName, setInmateName] = useState("N/A");
   const [error, setError] = useState(null);
+
+  const getAllergyNames = (allergyIds) => {
+    if (!allergyIds || !allergyIds.length) return ["N/A"];
+    return allergyIds.map((id) => {
+      const allergy = allergiesData.find((allergy) => allergy._id === id);
+      return allergy ? allergy.allergyName : "N/A";
+    });
+  };
+
 
   useEffect(() => {
     if (selectedMealPlanId) {
@@ -47,18 +56,21 @@ const PreviewMealPlan = ({ open, onClose, selectedMealPlanId }) => {
           setError(`Inmate Not Found for ID: ${inmateId}`);
         }
 
+        // Map allergy IDs to allergy names using the helper function
+        const allergies = getAllergyNames(selectedMealPlan.allergyId);
+
         setMealPlanDetails({
           inmateId: selectedMealPlan.inmateId,
           mealType: selectedMealPlan.mealType || "",
           mealPlan: selectedMealPlan.mealPlan || "",
-          allergies: selectedMealPlan.allergy || [],
+          allergies: allergies, // Sets allergy names here
           dietaryPreferences: selectedMealPlan.dietaryPreferences || "N/A",
         });
       } else {
         setError("Meal plan data not found.");
       }
     }
-  }, [selectedMealPlanId, mealPlanData, inmatesData]);
+  }, [selectedMealPlanId, mealPlanData, inmatesData, allergiesData]);
 
   const handleDownload = async () => {
     if (!mealPlanDetails) return;

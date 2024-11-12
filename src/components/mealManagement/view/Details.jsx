@@ -160,7 +160,7 @@ const Details = ({ open, onClose, selectedMealPlanId }) => {
                     ))
                   ) : (
                     <Typography variant="body2" color="textSecondary">
-                      No allergies listed
+                      N/A
                     </Typography>
                   )}
                 </Stack>

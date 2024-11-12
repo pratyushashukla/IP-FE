@@ -7,6 +7,7 @@ import { jsPDF } from 'jspdf';
 const DownloadMealPlan = ({ selectedMealPlanId }) => {
   const mealPlanData = useSelector((state) => state.MealPlanReducer.mealPlanData);
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
+  const allergiesData = useSelector((state) => state.AllergiesReducer.allergiesData || []);
 
   const [mealData, setMealData] = useState({
     inmateId: "",
@@ -17,6 +18,15 @@ const DownloadMealPlan = ({ selectedMealPlanId }) => {
   });
   const [inmateName, setInmateName] = useState("N/A");
   const [error, setError] = useState(null);
+
+  const getAllergyNames = (allergyIds) => {
+    if (!allergyIds || !allergyIds.length) return ["N/A"];
+    return allergyIds.map((id) => {
+      const allergy = allergiesData.find((allergy) => allergy._id === id);
+      return allergy ? allergy.allergyName : "N/A";
+    });
+  };
+
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(true); // Initially open dialog
 
   useEffect(() => {
@@ -28,18 +38,21 @@ const DownloadMealPlan = ({ selectedMealPlanId }) => {
 
         setInmateName(inmate ? `${inmate.firstName} ${inmate.lastName}` : "N/A");
 
+        // Map allergy IDs to allergy names using the helper function
+        const allergies = getAllergyNames(selectedMealPlan.allergyId);
+
         setMealData({
           inmateId: selectedMealPlan.inmateId,
           mealType: selectedMealPlan.mealType || "",
           mealPlan: selectedMealPlan.mealPlan || "",
           dietaryPreferences: selectedMealPlan.dietaryPreferences || "N/A",
-          allergies: selectedMealPlan.allergy || [],
+          allergies: allergies, // Sets allergy names here
         });
       } else {
         setError("Meal plan data not found.");
       }
     }
-  }, [selectedMealPlanId, mealPlanData, inmatesData]);
+  }, [selectedMealPlanId, mealPlanData, inmatesData, allergiesData]);
 
   const generatePDF = async () => {
     const tableContainer = document.createElement('div');
