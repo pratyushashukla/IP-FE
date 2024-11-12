@@ -9,55 +9,32 @@ import {
   Paper,
   IconButton,
   Tooltip,
-  Popover,
-  List,
-  ListItem,
-  ListItemText,
-  Button,
-  Box,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Chip,
+  TextField,
+  Stack,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Button,
+  Box,
 } from "@mui/material";
-import { styled, tableCellClasses } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useDispatch, useSelector } from "react-redux";
-import { GET_MEALPLAN, DELETE_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
+import { GET_MEALPLAN, DELETE_MEALPLAN, EMAIL_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
 import { GET_ALLERGIES } from "../../../actions/allergies/ActionCreators";
-// Import the components for Update, Details, Preview, and Download
 import UpdateMealPlan from "../update/UpdateMealPlan";
 import Details from "../view/Details";
 import PreviewMealPlan from "../download/PreviewMealPlan";
 import DownloadMealPlan from "../download/DownloadMealPlan";
-
-// Styled components for custom styling
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  margin: "20px auto",
-  maxWidth: "1200px",
-  borderRadius: theme.shape.borderRadius,
-  boxShadow: theme.shadows[4],
-}));
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-}));
 
 const ViewMealPlan = () => {
   const dispatch = useDispatch();
@@ -65,235 +42,233 @@ const ViewMealPlan = () => {
   const allergiesData = useSelector((state) => state.AllergiesReducer.allergiesData || []);
 
   const [selectedMealPlan, setSelectedMealPlan] = useState(null);
+  const [dialogType, setDialogType] = useState(null);
+  const [email, setEmail] = useState(""); // Email input
   const [anchorEl, setAnchorEl] = useState(null);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [showDownload, setShowDownload] = useState(false);
 
   useEffect(() => {
     dispatch(GET_MEALPLAN());
-    dispatch(GET_ALLERGIES()); // Fetch allergies data when the component mounts
+    dispatch(GET_ALLERGIES());
   }, [dispatch]);
 
-  // Helper function to get allergy name by ID
-  const getAllergyNameById = (allergyId) => {
-    if (!allergyId) return "No allergy";
-
-    if (!Array.isArray(allergiesData)) {
-      console.error("allergiesData is not an array:", allergiesData);
-      return "Unknown Allergy"; // Return a fallback value
-    }
-
-    const allergy = allergiesData.find((allergy) => allergy._id === allergyId);
-    return allergy ? allergy.name : "Unknown Allergy";
+  const getAllergyNames = (allergyIds) => {
+    if (!allergyIds || !allergyIds.length) return ["No allergy"];
+    return allergyIds.map((id) => {
+      const allergy = allergiesData.find((allergy) => allergy._id === id);
+      return allergy ? allergy.allergyName : "Unknown Allergy";
+    });
   };
 
-  const handleOpenMenu = (event, mealPlan) => {
+  const handleMenuOpen = (event, mealPlan) => {
     setAnchorEl(event.currentTarget);
     setSelectedMealPlan(mealPlan);
   };
 
-  const handleCloseMenu = () => {
+  const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleOpenDialog = (type) => {
+    setDialogType(type);
+    handleMenuClose();
+  };
+
+  const handleCloseDialog = () => {
+    setDialogType(null);
     setSelectedMealPlan(null);
   };
 
-  const handlePreview = () => {
-    setShowPreview(true);
-    handleCloseMenu();
-  };
-
-  const handleDownload = () => {
-    setShowDownload(true);
-    handleCloseMenu();
-  };
-
-  const handleUpdate = () => {
-    setShowUpdateDialog(true);
-    handleCloseMenu();
-  };
-
-  const handleDetails = () => {
-    setShowDetailsDialog(true);
-    handleCloseMenu();
-  };
-
-  const handleDelete = () => {
-    setOpenDeleteDialog(true);
-    handleCloseMenu();
-  };
-
   const handleConfirmDelete = () => {
-    if (!selectedMealPlan || !selectedMealPlan._id) {
-      console.error("Selected meal plan is not valid or has no ID.");
-      return;
+    if (selectedMealPlan && selectedMealPlan._id) {
+      dispatch(
+        DELETE_MEALPLAN(selectedMealPlan._id, () => {
+          handleCloseDialog();
+        })
+      );
     }
-
-    dispatch(
-      DELETE_MEALPLAN(selectedMealPlan._id, () => {
-        setOpenDeleteDialog(false);
-        setSelectedMealPlan(null);
-      })
-    );
   };
+
+  const handleSendEmail = () => {
+    console.log("handleSendEmail called"); 
+    if (selectedMealPlan && selectedMealPlan._id && email) {
+      dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email))
+        .then(() => {
+          alert(`Email sent to: ${email}`);
+          handleCloseDialog();
+          setEmail("");
+        })
+        .catch((error) => {
+          console.error("Failed to send email:", error);
+          alert("Failed to send email. Please try again.");
+        });
+    }
+  };
+  
 
   return (
     <Box mt={4}>
-      <StyledTableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ margin: "20px auto", maxWidth: "1200px" }}>
         <Table>
           <TableHead>
             <TableRow>
-              <StyledTableCell>Inmate Name</StyledTableCell>
-              <StyledTableCell>Meal Plan</StyledTableCell>
-              <StyledTableCell>Meal Type</StyledTableCell>
-              <StyledTableCell>Dietary Preferences</StyledTableCell>
-              <StyledTableCell>Allergy</StyledTableCell>
-              <StyledTableCell align="center">Actions</StyledTableCell>
-              <StyledTableCell align="center">Options</StyledTableCell>
+              <TableCell><strong>Inmate Name</strong></TableCell>
+              <TableCell><strong>Meal Plan</strong></TableCell>
+              <TableCell><strong>Meal Type</strong></TableCell>
+              <TableCell><strong>Dietary Preferences</strong></TableCell>
+              <TableCell><strong>Allergy</strong></TableCell>
+              <TableCell align="center"><strong>Actions</strong></TableCell>
+              <TableCell align="center"><strong>Options</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {mealPlansData.map((mealPlan) => (
-              <StyledTableRow key={mealPlan._id}>
-                <StyledTableCell>
+              <TableRow key={mealPlan._id}>
+                <TableCell>
                   {mealPlan.inmateId?.firstName || mealPlan.inmateId?.lastName
                     ? `${mealPlan.inmateId.firstName || ""} ${mealPlan.inmateId.lastName || ""}`.trim()
                     : "N/A"}
-                </StyledTableCell>
-                <StyledTableCell>{mealPlan.mealPlan}</StyledTableCell>
-                <StyledTableCell>{mealPlan.mealType}</StyledTableCell>
-                <StyledTableCell>{mealPlan.dietaryPreferences}</StyledTableCell>
-                <StyledTableCell>
-                  {getAllergyNameById(mealPlan.allergyId)}
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  <Tooltip title="Options">
-                    <IconButton
-                      onClick={(e) => handleOpenMenu(e, mealPlan)}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Tooltip>
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  <Tooltip title="Preview">
-                    <Button
-                      variant="contained"
-                      color="primary"
+                </TableCell>
+                <TableCell>{mealPlan.mealPlan}</TableCell>
+                <TableCell>{mealPlan.mealType}</TableCell>
+                <TableCell>{mealPlan.dietaryPreferences || "N/A"}</TableCell>
+                <TableCell>
+                  {getAllergyNames(mealPlan.allergyId).map((allergyName, index) => (
+                    <Chip key={`${allergyName}-${index}`} label={allergyName} variant="outlined" />
+                  ))}
+                </TableCell>
+                <TableCell align="center">
+                  <IconButton onClick={(e) => handleMenuOpen(e, mealPlan)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl && selectedMealPlan?._id === mealPlan._id)}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem onClick={() => handleOpenDialog("details")}>
+                      <ListItemIcon>
+                        <VisibilityIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Details</ListItemText>
+                    </MenuItem>
+                    <MenuItem onClick={() => handleOpenDialog("update")}>
+                      <ListItemIcon>
+                        <EditIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Update</ListItemText>
+                    </MenuItem>
+                    <MenuItem
                       onClick={() => {
-                        setSelectedMealPlan(mealPlan);
-                        handlePreview();
+                        setSelectedMealPlan(mealPlan);  
+                        setDialogType("delete");
                       }}
-                      style={{ marginRight: 8 }}
+                    >
+                      <ListItemIcon>
+                        <DeleteIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Delete</ListItemText>
+                    </MenuItem>
+                  </Menu>
+                </TableCell>
+                <TableCell align="center">
+                  <Stack direction="row" spacing={1}>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      onClick={() => {
+                        setSelectedMealPlan(mealPlan);  
+                        handleOpenDialog("preview");
+                      }}
                     >
                       Preview
                     </Button>
-                  </Tooltip>
-                  <Tooltip title="Download">
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => {
-                        setSelectedMealPlan(mealPlan);
-                        handleDownload();
-                      }}
+                    <Button 
+                      variant="contained" 
+                      color="secondary" 
+                      onClick={() => setDialogType("download")}
                     >
                       Download
                     </Button>
-                  </Tooltip>
-                </StyledTableCell>
-              </StyledTableRow>
+                    <Button variant="contained" color="primary" onClick={() => handleOpenDialog("email")}>
+                      Email
+                    </Button>
+                  </Stack>
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
-      </StyledTableContainer>
+      </TableContainer>
 
-      {/* Options Popover Menu */}
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
-      >
-        <List>
-          <ListItem button onClick={handleDetails} sx={{ cursor: "pointer" }}>
-            <ListItemText primary="Details" />
-          </ListItem>
-          <ListItem button onClick={handleUpdate} sx={{ cursor: "pointer" }}>
-            <ListItemText primary="Update" />
-          </ListItem>
-          <ListItem button onClick={handleDelete} sx={{ cursor: "pointer" }}>
-            <ListItemText primary="Delete" />
-          </ListItem>
-        </List>
-      </Popover>
-
-            {/* Conditional Rendering for Preview and Download */}
-            {selectedMealPlan && showPreview && (
-        <Dialog open={showPreview} onClose={() => setShowPreview(false)} maxWidth="md" fullWidth>
-          <PreviewMealPlan selectedMealPlanId={selectedMealPlan._id} />
-          <DialogActions>
-            <Button onClick={() => setShowPreview(false)} color="primary">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-
-      {selectedMealPlan && showDownload && (
-        <Dialog open={showDownload} onClose={() => setShowDownload(false)} maxWidth="md" fullWidth>
-          <DownloadMealPlan selectedMealPlanId={selectedMealPlan._id} />
-          <DialogActions>
-            <Button onClick={() => setShowDownload(false)} color="primary">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-
-      {/* Details Dialog */}
-      {showDetailsDialog && (
-        <Dialog open={showDetailsDialog} onClose={() => setShowDetailsDialog(false)} maxWidth="md" fullWidth>
-          <Details selectedMealPlanId={selectedMealPlan ? selectedMealPlan._id : null} />
-          <DialogActions>
-            <Button onClick={() => setShowDetailsDialog(false)} color="primary">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-
-      {/* Update Dialog */}
-      {showUpdateDialog && (
-        <Dialog open={showUpdateDialog} onClose={() => setShowUpdateDialog(false)} maxWidth="sm" fullWidth>
-          <UpdateMealPlan
-            open={showUpdateDialog}
-            onClose={() => setShowUpdateDialog(false)}
-            onUpdate={() => dispatch(GET_MEALPLAN())}
-            selectedMealPlanId={selectedMealPlan ? selectedMealPlan._id : null}
-          />
-        </Dialog>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+      {/* Dialog for Email */}
+      <Dialog open={Boolean(dialogType === "email")} onClose={handleCloseDialog} fullWidth maxWidth="md">
+        <DialogTitle>Send Email</DialogTitle>
         <DialogContent>
-          <DialogContentText>Are you sure you want to delete this meal plan?</DialogContentText>
+          <DialogContentText>Enter the email address to send this meal plan.</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Email Address"
+            type="email"
+            fullWidth
+            variant="outlined"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
-            Confirm
-          </Button>
+          <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
+          <Button onClick={handleSendEmail} color="primary">Send</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      {dialogType === "delete" && (
+        <Dialog open={true} onClose={handleCloseDialog}>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Are you sure you want to delete this meal plan?</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/* Direct Rendering of Details, Update, Preview, and DownloadMealPlan */}
+      {dialogType === "details" && (
+        <Details 
+          open 
+          selectedMealPlanId={selectedMealPlan?._id} 
+          onClose={handleCloseDialog}
+        />
+      )}
+      {dialogType === "update" && (
+        <UpdateMealPlan
+          open
+          selectedMealPlanId={selectedMealPlan?._id}
+          onClose={handleCloseDialog}
+          onUpdate={() => {
+            dispatch(GET_MEALPLAN());
+            handleCloseDialog();
+          }}
+        />
+      )}
+      {dialogType === "preview" && (
+        <PreviewMealPlan 
+          open 
+          selectedMealPlanId={selectedMealPlan?._id} 
+          onClose={handleCloseDialog}
+        />
+      )}
+      {dialogType === "download" && (
+        <DownloadMealPlan selectedMealPlanId={selectedMealPlan?._id} />
+      )}
     </Box>
   );
 };

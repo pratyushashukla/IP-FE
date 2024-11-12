@@ -14,39 +14,36 @@ import {
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useDispatch, useSelector } from "react-redux";
 import { GET_ALLERGIES, ADD_ALLERGY } from "../../actions/allergies/ActionCreators";
-import { createSelector } from 'reselect';
 
-const selectAllergiesState = (state) => state.allergiesData || [];
-
-// Memoized selector for allergies
-const selectAllergies = createSelector(
-  [selectAllergiesState],
-  (allergies) => allergies
-);
-const AllergyDropdown = ({ value, onChange }) => {
+const AllergyDropdown = ({ value = [], onChange }) => {
   const dispatch = useDispatch();
-  const allergies = useSelector(selectAllergies); // Use the memoized selector
 
-  const [selectedAllergies, setSelectedAllergies] = useState(value || []);
+  // Fetch allergies directly
+  const allergies = useSelector((state) => state.AllergiesReducer.allergiesData || []);
+  
+  const [selectedAllergies, setSelectedAllergies] = useState(value); // Initialize with value
   const [openDialog, setOpenDialog] = useState(false);
   const [newAllergy, setNewAllergy] = useState("");
   const [newAllergyDescription, setNewAllergyDescription] = useState("");
 
-  const dialogRef = useRef(null);
   const firstInputRef = useRef(null);
 
   useEffect(() => {
-    dispatch(GET_ALLERGIES()); // Dispatch action to fetch allergies when component mounts
+    // Dispatch action to fetch allergies when component mounts
+    dispatch(GET_ALLERGIES());
   }, [dispatch]);
+
+  // Update selected allergies when the prop value changes
+  useEffect(() => {
+    setSelectedAllergies(value);
+  }, [value]);
 
   useEffect(() => {
     if (openDialog) {
-      // Focus the first input field in the dialog when it opens
       firstInputRef.current?.focus();
     }
   }, [openDialog]);
 
-  // API call to create a new allergy
   const handleCreateAllergy = async () => {
     const newAllergyObject = {
       allergyName: newAllergy,
@@ -54,12 +51,10 @@ const AllergyDropdown = ({ value, onChange }) => {
     };
 
     try {
-      // Call the action to create allergy (API call logic should be handled in this action)
       await dispatch(ADD_ALLERGY(newAllergyObject));
-
-      // After successfully creating, update local state and Redux state
-      setSelectedAllergies((prev) => [...prev, newAllergyObject]);
-      onChange([...selectedAllergies, newAllergyObject]); // Notify parent component
+      const updatedAllergies = [...selectedAllergies, newAllergyObject];
+      setSelectedAllergies(updatedAllergies);
+      onChange(updatedAllergies);
       setOpenDialog(false);
       setNewAllergy("");
       setNewAllergyDescription("");
@@ -69,9 +64,9 @@ const AllergyDropdown = ({ value, onChange }) => {
   };
 
   const handleChange = (event, newValue) => {
-    if (newValue.some((option) => option.id === 'create')) {
+    if (newValue.some((option) => option.id === "create")) {
       setOpenDialog(true);
-      setSelectedAllergies(newValue.filter((option) => option.id !== 'create'));
+      setSelectedAllergies(newValue.filter((option) => option.id !== "create"));
     } else {
       setSelectedAllergies(newValue);
       onChange(newValue);
@@ -80,19 +75,21 @@ const AllergyDropdown = ({ value, onChange }) => {
 
   const handleDialogClose = () => {
     setOpenDialog(false);
-    // Optionally return focus to the element that had focus before the dialog was opened
-    if (dialogRef.current) {
-      dialogRef.current.removeAttribute("inert"); // Remove inert on dialog close
-    }
   };
 
+  // Add "Create New Allergy" option to the allergies list
+  const optionsWithCreateNew = [
+    ...allergies,
+    { id: "create", allergyName: "Create New Allergy" },
+  ];
+
   return (
-    <Stack spacing={3} sx={{ width: '100%' }}>
+    <Stack spacing={3} sx={{ width: "100%" }}>
       <Autocomplete
         multiple
         id="allergy-autocomplete"
-        options={[...allergies, { id: 'create', title: 'Create New Allergy' }]}
-        getOptionLabel={(option) => option.title || ''}
+        options={optionsWithCreateNew}
+        getOptionLabel={(option) => option.allergyName || ""}
         value={selectedAllergies}
         onChange={handleChange}
         renderInput={(params) => (
@@ -104,31 +101,25 @@ const AllergyDropdown = ({ value, onChange }) => {
           />
         )}
         renderOption={(props, option) => {
-          if (option.id === 'create') {
+          if (option.id === "create") {
             return (
-              <MenuItem
-                {...props}
-                onClick={() => setOpenDialog(true)}
-                style={{ display: "flex", justifyContent: "center" }}
-              >
+              <MenuItem {...props} style={{ display: "flex", justifyContent: "center" }}>
                 <AddCircleOutlineIcon style={{ marginRight: "8px" }} />
                 <Typography color="primary">Create New Allergy</Typography>
               </MenuItem>
             );
           }
-          return <MenuItem {...props}>{option.title}</MenuItem>;
+          return <MenuItem {...props}>{option.allergyName}</MenuItem>;
         }}
       />
 
       <Dialog
-        ref={dialogRef}
         open={openDialog}
         onClose={handleDialogClose}
         maxWidth="sm"
         fullWidth
         aria-labelledby="create-new-allergy-title"
         aria-describedby="create-new-allergy-description"
-        onBackdropClick={handleDialogClose} // Optional: Close on backdrop click
       >
         <DialogTitle id="create-new-allergy-title">Create New Allergy</DialogTitle>
         <DialogContent>
@@ -141,7 +132,7 @@ const AllergyDropdown = ({ value, onChange }) => {
             value={newAllergy}
             onChange={(e) => setNewAllergy(e.target.value)}
             variant="outlined"
-            inputRef={firstInputRef} // Reference for focusing the first input field
+            inputRef={firstInputRef}
           />
           <TextField
             margin="dense"
@@ -163,7 +154,7 @@ const AllergyDropdown = ({ value, onChange }) => {
             onClick={handleCreateAllergy}
             color="primary"
             variant="contained"
-            disabled={!newAllergy.trim()} // Disable if name is empty
+            disabled={!newAllergy.trim()}
           >
             Create
           </Button>

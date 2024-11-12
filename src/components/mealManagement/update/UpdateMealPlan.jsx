@@ -11,40 +11,45 @@ import {
   FormLabel,
   Box,
   MenuItem,
-  Typography,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import AllergyDropdown from "../AllergyDropdown"; 
 import { UPDATE_MEALPLAN, GET_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
+import AllergyDropdown from "../AllergyDropdown"; // Import the custom AllergyDropdown
 
 const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
   const dispatch = useDispatch();
+  const mealPlanData = useSelector((state) => state.MealPlanReducer.mealPlanData);
+  const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
+  const allergiesData = useSelector((state) => state.AllergiesReducer.allergiesData || []);
+
   const [mealPlan, setMealPlan] = useState({
-    inmateId: "", // Read-only field populated from existing data
+    inmateId: "",
     mealType: "",
     mealPlan: "",
-    allergy: [],
-    dietaryPreferences: "",
+    allergy: [], 
+    dietaryPreferences: "N/A",
   });
-  const [error, setError] = useState(null); // Error state
+  const [inmateName, setInmateName] = useState("N/A");
 
-  // Fetch meal plan data if not already available in Redux store
   useEffect(() => {
     if (selectedMealPlanId) {
-      dispatch(
-        GET_MEALPLAN(selectedMealPlanId, (data) => {
-          if (data) {
-            setMealPlan({
-              ...data,
-              inmateId: data.inmate._id, // Set inmate ID as readonly field
-            });
-          } else {
-            setError("Meal plan data not found.");
-          }
-        })
-      );
+      const selectedMealPlan = mealPlanData.find((plan) => plan._id === selectedMealPlanId);
+      if (selectedMealPlan) {
+        const inmateId = selectedMealPlan.inmateId._id || selectedMealPlan.inmateId;
+        const inmate = inmatesData.find((inmate) => inmate._id === inmateId);
+        setInmateName(inmate ? `${inmate.firstName} ${inmate.lastName}` : "N/A");
+
+        // Sets allergies with IDs directly
+        setMealPlan({
+          inmateId: selectedMealPlan.inmateId,
+          mealType: selectedMealPlan.mealType || "",
+          mealPlan: selectedMealPlan.mealPlan || "",
+          allergy: selectedMealPlan.allergyId || [], // Set IDs directly here
+          dietaryPreferences: selectedMealPlan.dietaryPreferences || "N/A",
+        });
+      }
     }
-  }, [selectedMealPlanId, dispatch]);
+  }, [selectedMealPlanId, mealPlanData, inmatesData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,17 +59,11 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
     }));
   };
 
-  const handleUpdate = () => {
-    if (mealPlan.mealType && mealPlan.mealPlan) {
-      dispatch(
-        UPDATE_MEALPLAN(mealPlan, () => {
-          onUpdate(); // Callback after update
-          onClose();  // Close the dialog
-        })
-      );
-    } else {
-      setError("Please fill in all required fields.");
-    }
+  const handleAllergyChange = (selectedAllergies) => {
+    setMealPlan((prevMealPlan) => ({
+      ...prevMealPlan,
+      allergy: selectedAllergies,
+    }));
   };
 
   const isFormValid = mealPlan.mealType && mealPlan.mealPlan;
@@ -73,19 +72,18 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Update Meal Plan</DialogTitle>
       <DialogContent>
-        {error && <Typography color="error">{error}</Typography>} {/* Display error if any */}
         <Box>
           <Grid container spacing={2}>
-            {/* Inmate Field (Read-only) */}
+            {/* Inmate Name (Read-only) */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="inmateId" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Inmate
+                <FormLabel htmlFor="inmateName" sx={{ mb: 1, fontWeight: "bold" }}>
+                  Inmate Name
                 </FormLabel>
                 <TextField
-                  id="inmateId"
-                  name="inmateId"
-                  value={mealPlan.inmateId}
+                  id="inmateName"
+                  name="inmateName"
+                  value={inmateName}
                   variant="outlined"
                   InputProps={{
                     readOnly: true,
@@ -138,17 +136,15 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
               </FormControl>
             </Grid>
 
-            {/* Allergy Field */}
+            {/* Allergy Dropdown */}
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormLabel htmlFor="allergy" sx={{ mb: 1, fontWeight: "bold" }}>
                   Allergy
                 </FormLabel>
                 <AllergyDropdown
-                  value={mealPlan.allergy}
-                  onChange={(selectedAllergies) =>
-                    setMealPlan({ ...mealPlan, allergy: selectedAllergies })
-                  }
+                  value={mealPlan.allergy} // This is now a list of allergy IDs
+                  onChange={handleAllergyChange}
                 />
               </FormControl>
             </Grid>
@@ -171,14 +167,13 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
           </Grid>
         </Box>
       </DialogContent>
-
       <DialogActions sx={{ justifyContent: "right", pb: 2 }}>
         <Button onClick={onClose} variant="contained" color="primary">
           Cancel
         </Button>
         <Button
           type="button"
-          onClick={handleUpdate}
+          onClick={() => onUpdate(mealPlan)}
           variant="contained"
           color="primary"
           disabled={!isFormValid}
