@@ -37,11 +37,11 @@ ApiService.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response.status === 401 && error.response.data.message.includes("Session expired")) {
-      // Handle session expiration and logout
-      const dispatch = useDispatch();
-      const navigate = useNavigate();
-      dispatch(LOGOUT(navigate));
+    if (error.status === 401) {
+      localStorage.clear();
+      setTimeout(() => {
+        window.location.href="/sign-in"
+      }, 1000);
     }
     return Promise.reject(error);
   }

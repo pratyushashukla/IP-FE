@@ -209,7 +209,7 @@ const ViewInmates = ({ handleUpdateModal }) => {
         >
           <List sx={{ cursor: "pointer" }}>
             <ListItem button onClick={handleEdit}>
-              <ListItemText primary="Details" />
+              <ListItemText primary="Update" />
             </ListItem>
             <ListItem button onClick={handleDelete}>
               <ListItemText primary="Delete" />
