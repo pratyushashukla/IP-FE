@@ -29,7 +29,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useDispatch, useSelector } from "react-redux";
-import { GET_MEALPLAN, DELETE_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
+import { GET_MEALPLAN, DELETE_MEALPLAN, EMAIL_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
 import { GET_ALLERGIES } from "../../../actions/allergies/ActionCreators";
 import UpdateMealPlan from "../update/UpdateMealPlan";
 import Details from "../view/Details";
@@ -89,11 +89,21 @@ const ViewMealPlan = () => {
   };
 
   const handleSendEmail = () => {
-    console.log("Email sent to:", email);
-    handleCloseDialog();
-    setEmail("");
-} ;
-
+    console.log("handleSendEmail called"); 
+    if (selectedMealPlan && selectedMealPlan._id && email) {
+      dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email))
+        .then(() => {
+          alert(`Email sent to: ${email}`);
+          handleCloseDialog();
+          setEmail("");
+        })
+        .catch((error) => {
+          console.error("Failed to send email:", error);
+          alert("Failed to send email. Please try again.");
+        });
+    }
+  };
+  
 
   return (
     <Box mt={4}>
@@ -190,53 +200,25 @@ const ViewMealPlan = () => {
         </Table>
       </TableContainer>
 
-      {/* Dialog for Details, Update, Preview, Email */}
-      <Dialog open={Boolean(dialogType && dialogType !== "download" && dialogType !== "delete")} onClose={handleCloseDialog} fullWidth maxWidth="md">
-        <DialogTitle>
-          {dialogType === "email" ? "Send Email" : dialogType ? dialogType.charAt(0).toUpperCase() + dialogType.slice(1) : ""}
-        </DialogTitle>
+      {/* Dialog for Email */}
+      <Dialog open={Boolean(dialogType === "email")} onClose={handleCloseDialog} fullWidth maxWidth="md">
+        <DialogTitle>Send Email</DialogTitle>
         <DialogContent>
-          {dialogType === "details" && 
-            <Details open={Boolean(dialogType === "details")} 
-              selectedMealPlanId={selectedMealPlan?._id} 
-              onClose={handleCloseDialog}
-            />}
-          {dialogType === "update" && (
-            <UpdateMealPlan
-              open={Boolean(dialogType === "update")}
-              selectedMealPlanId={selectedMealPlan?._id}
-              onClose={handleCloseDialog}
-              onUpdate={() => {
-                dispatch(GET_MEALPLAN());
-                handleCloseDialog();
-              }}
-            />
-          )}
-          {dialogType === "preview" && 
-            <PreviewMealPlan 
-              open={Boolean(dialogType === "preview")} 
-              selectedMealPlanId={selectedMealPlan?._id} 
-              onClose={handleCloseDialog}
-            />}
-          {dialogType === "email" && (
-            <>
-              <DialogContentText>Enter the email address to send this meal plan.</DialogContentText>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Email Address"
-                type="email"
-                fullWidth
-                variant="outlined"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </>
-          )}
+          <DialogContentText>Enter the email address to send this meal plan.</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Email Address"
+            type="email"
+            fullWidth
+            variant="outlined"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
-          {dialogType === "email" && <Button onClick={handleSendEmail} color="primary">Send</Button>}
+          <Button onClick={handleSendEmail} color="primary">Send</Button>
         </DialogActions>
       </Dialog>
 
@@ -258,7 +240,32 @@ const ViewMealPlan = () => {
         </Dialog>
       )}
 
-      {/* Direct Rendering of DownloadMealPlan */}
+      {/* Direct Rendering of Details, Update, Preview, and DownloadMealPlan */}
+      {dialogType === "details" && (
+        <Details 
+          open 
+          selectedMealPlanId={selectedMealPlan?._id} 
+          onClose={handleCloseDialog}
+        />
+      )}
+      {dialogType === "update" && (
+        <UpdateMealPlan
+          open
+          selectedMealPlanId={selectedMealPlan?._id}
+          onClose={handleCloseDialog}
+          onUpdate={() => {
+            dispatch(GET_MEALPLAN());
+            handleCloseDialog();
+          }}
+        />
+      )}
+      {dialogType === "preview" && (
+        <PreviewMealPlan 
+          open 
+          selectedMealPlanId={selectedMealPlan?._id} 
+          onClose={handleCloseDialog}
+        />
+      )}
       {dialogType === "download" && (
         <DownloadMealPlan selectedMealPlanId={selectedMealPlan?._id} />
       )}
