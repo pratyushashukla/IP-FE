@@ -23,11 +23,15 @@ import {
   ListItemText,
   Button,
   Box,
+  InputAdornment,
+  Select,
+  MenuItem as MuiMenuItem
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import ClearIcon from "@mui/icons-material/Clear"; // For Clear Icon
 import { useDispatch, useSelector } from "react-redux";
 import { GET_MEALPLAN, DELETE_MEALPLAN, EMAIL_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
 import { GET_ALLERGIES } from "../../../actions/allergies/ActionCreators";
@@ -43,8 +47,14 @@ const ViewMealPlan = () => {
 
   const [selectedMealPlan, setSelectedMealPlan] = useState(null);
   const [dialogType, setDialogType] = useState(null);
-  const [email, setEmail] = useState(""); // Email input
+  const [email, setEmail] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
+
+  // Filter states
+  const [inmateNameFilter, setInmateNameFilter] = useState("");
+  const [mealTypeFilter, setMealTypeFilter] = useState("");
+  const [mealPlanFilter, setMealPlanFilter] = useState("");
+  const [allergyFilter, setAllergyFilter] = useState("");
 
   useEffect(() => {
     dispatch(GET_MEALPLAN());
@@ -89,7 +99,6 @@ const ViewMealPlan = () => {
   };
 
   const handleSendEmail = () => {
-    console.log("handleSendEmail called"); 
     if (selectedMealPlan && selectedMealPlan._id && email) {
       dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email))
         .then(() => {
@@ -103,10 +112,71 @@ const ViewMealPlan = () => {
         });
     }
   };
-  
+
+  const handleClearFilters = () => {
+    setInmateNameFilter("");
+    setMealTypeFilter("");
+    setMealPlanFilter("");
+    setAllergyFilter("");
+  };
+
+  // Filter mealPlans based on selected filters
+  const filteredMealPlans = mealPlansData.filter((mealPlan) => {
+    return (
+      (inmateNameFilter ? `${mealPlan.inmateId.firstName} ${mealPlan.inmateId.lastName}`.toLowerCase().includes(inmateNameFilter.toLowerCase()) : true) &&
+      (mealTypeFilter ? mealPlan.mealType === mealTypeFilter : true) &&
+      (mealPlanFilter ? mealPlan.mealPlan === mealPlanFilter : true) &&
+      (allergyFilter ? getAllergyNames(mealPlan.allergyId).some(allergy => allergy.toLowerCase().includes(allergyFilter.toLowerCase())) : true)
+    );
+  });
 
   return (
     <Box mt={4}>
+      {/* Search Filters */}
+      <Stack direction="row" spacing={2} mb={2}>
+        <TextField
+          label="Inmate Name"
+          value={inmateNameFilter}
+          onChange={(e) => setInmateNameFilter(e.target.value)}
+          variant="outlined"
+          fullWidth
+        />
+        <Select
+          label="Meal Type"
+          value={mealTypeFilter}
+          onChange={(e) => setMealTypeFilter(e.target.value)}
+          displayEmpty
+          fullWidth
+        >
+          <MuiMenuItem value="">All</MuiMenuItem>
+          <MuiMenuItem value="Vegetarian">Vegetarian</MuiMenuItem>
+          <MuiMenuItem value="Vegan">Vegan</MuiMenuItem>
+          <MuiMenuItem value="Non-Veg">Non-Veg</MuiMenuItem>
+          <MuiMenuItem value="Halal">Halal</MuiMenuItem>
+        </Select>
+        <Select
+          label="Meal Plan"
+          value={mealPlanFilter}
+          onChange={(e) => setMealPlanFilter(e.target.value)}
+          displayEmpty
+          fullWidth
+        >
+          <MuiMenuItem value="">All</MuiMenuItem>
+          <MuiMenuItem value="Weekly">Weekly</MuiMenuItem>
+          <MuiMenuItem value="Monthly">Monthly</MuiMenuItem>
+        </Select>
+        <TextField
+          label="Allergy"
+          value={allergyFilter}
+          onChange={(e) => setAllergyFilter(e.target.value)}
+          variant="outlined"
+          fullWidth
+        />
+        <IconButton onClick={handleClearFilters} color="secondary">
+          <ClearIcon />
+        </IconButton>
+      </Stack>
+
       <TableContainer component={Paper} sx={{ margin: "20px auto", maxWidth: "1200px" }}>
         <Table>
           <TableHead>
@@ -121,7 +191,7 @@ const ViewMealPlan = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {mealPlansData.map((mealPlan) => (
+            {filteredMealPlans.map((mealPlan) => (
               <TableRow key={mealPlan._id}>
                 <TableCell>
                   {mealPlan.inmateId?.firstName || mealPlan.inmateId?.lastName
@@ -157,18 +227,14 @@ const ViewMealPlan = () => {
                       </ListItemIcon>
                       <ListItemText>Update</ListItemText>
                     </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setSelectedMealPlan(mealPlan);  
-                        setDialogType("delete");
-                      }}
-                    >
+                    <MenuItem onClick={() => handleOpenDialog("delete")}>
                       <ListItemIcon>
                         <DeleteIcon fontSize="small" />
                       </ListItemIcon>
                       <ListItemText>Delete</ListItemText>
                     </MenuItem>
                   </Menu>
+                  
                 </TableCell>
                 <TableCell align="center">
                   <Stack direction="row" spacing={1}>
@@ -195,52 +261,81 @@ const ViewMealPlan = () => {
                   </Stack>
                 </TableCell>
               </TableRow>
+              
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Dialog for Email */}
-      <Dialog open={Boolean(dialogType === "email")} onClose={handleCloseDialog} fullWidth maxWidth="md">
-        <DialogTitle>Send Email</DialogTitle>
+      {/* Dialogs for options */}
+      <Dialog open={dialogType === "delete"} onClose={handleCloseDialog}>
+        <DialogTitle>Delete Meal Plan</DialogTitle>
         <DialogContent>
-          <DialogContentText>Enter the email address to send this meal plan.</DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Email Address"
-            type="email"
-            fullWidth
-            variant="outlined"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <DialogContentText>
+            Are you sure you want to delete this meal plan?
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
-          <Button onClick={handleSendEmail} color="primary">Send</Button>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="secondary">
+            Confirm
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      {dialogType === "delete" && (
-        <Dialog open={true} onClose={handleCloseDialog}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText>Are you sure you want to delete this meal plan?</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmDelete} color="primary" autoFocus>
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+      <Dialog open={dialogType === "details"} onClose={handleCloseDialog}>
+        <DialogTitle>Meal Plan Details</DialogTitle>
+        <DialogContent>
+          <Details mealPlan={selectedMealPlan} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-      {/* Direct Rendering of Details, Update, Preview, and DownloadMealPlan */}
+      <Dialog open={dialogType === "update"} onClose={handleCloseDialog}>
+        <DialogTitle>Update Meal Plan</DialogTitle>
+        <DialogContent>
+          <UpdateMealPlan mealPlan={selectedMealPlan} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={dialogType === "email"} onClose={handleCloseDialog}>
+        <DialogTitle>Send Meal Plan via Email</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Enter the recipient's email address to send the meal plan.
+          </DialogContentText>
+          <TextField
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            fullWidth
+            variant="outlined"
+            InputProps={{
+              startAdornment: <InputAdornment position="start">@</InputAdornment>,
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSendEmail} color="secondary">
+            Send Email
+          </Button>
+        </DialogActions>
+      </Dialog>
       {dialogType === "details" && (
         <Details 
           open 
@@ -270,6 +365,7 @@ const ViewMealPlan = () => {
         <DownloadMealPlan selectedMealPlanId={selectedMealPlan?._id} />
       )}
     </Box>
+    
   );
 };
 
