@@ -45,41 +45,52 @@ export default function SignUpCard() {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
-  const [open, setOpen] = React.useState(false);
+  const [phoneError, setPhoneError] = React.useState(false); // phone error state
+  const [phoneErrorMessage, setPhoneErrorMessage] = React.useState(""); // phone error message
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const formRef = React.useRef();
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const handleSubmit = (event) => {
-    if (!emailError || !passwordError) {
-      event.preventDefault();
-      const data = new FormData(event.currentTarget);
-      const obj = Object.fromEntries(data);
-      for (const key in obj) {
-        let trimmedValue = obj[key].trim();
-        if (trimmedValue.length === 0) {
-          delete obj[key];
-        }
-      }
-      dispatch(SIGNUP(obj, formRef, navigate));
+    event.preventDefault();
+
+    // Validate all fields before submission
+    if (!validateInputs()) {
+      return;
     }
+
+    const data = new FormData(event.currentTarget);
+    const obj = Object.fromEntries(data);
+
+    for (const key in obj) {
+      let trimmedValue = obj[key].trim();
+      if (trimmedValue.length === 0) {
+        delete obj[key];
+      }
+    }
+
+    dispatch(SIGNUP(obj, formRef, navigate));
   };
 
   const validateInputs = () => {
     const email = document.getElementById("email");
     const password = document.getElementById("password");
+    const phone = document.getElementById("phone");
 
     let isValid = true;
 
+    // Phone validation: Phone number should be 10 digits
+    if (phone.value.length > 10) {
+      setPhoneError(true);
+      setPhoneErrorMessage("Phone number cannot be more than 10 digits.");
+      isValid = false;
+    } else {
+      setPhoneError(false);
+      setPhoneErrorMessage("");
+    }
+
+    // Email validation
     if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
       setEmailError(true);
       setEmailErrorMessage("Please enter a valid email address.");
@@ -89,9 +100,17 @@ export default function SignUpCard() {
       setEmailErrorMessage("");
     }
 
-    if (!password.value || password.value.length < 6) {
+    // Password validation
+    const passwordValue = password.value;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;"'<>?,./\\|`~\-]).{6,}$/;
+
+    if (!passwordValue || passwordValue.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage("Password must be at least 6 characters long.");
+      isValid = false;
+    } else if (!passwordRegex.test(passwordValue)) {
+      setPasswordError(true);
+      setPasswordErrorMessage("Password must contain at least one uppercase letter, one special symbol, and one number.");
       isValid = false;
     } else {
       setPasswordError(false);
@@ -157,6 +176,7 @@ export default function SignUpCard() {
             </FormControl>
           </Grid>
         </Grid>
+
         {/* Username and Email */}
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -193,7 +213,8 @@ export default function SignUpCard() {
             </FormControl>
           </Grid>
         </Grid>
-        {/* Password and Role */}
+
+        {/* Password */}
         <Grid container spacing={2}>
           <Grid item xs={24} sm={12}>
             <FormControl fullWidth>
@@ -216,6 +237,7 @@ export default function SignUpCard() {
             </FormControl>
           </Grid>
         </Grid>
+
         {/* Phone and Address */}
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -229,56 +251,40 @@ export default function SignUpCard() {
                 required
                 fullWidth
                 variant="outlined"
+                error={phoneError}
+                helperText={phoneErrorMessage}
               />
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <FormLabel htmlFor="address">Address</FormLabel>
-                  <TextField
-                    id="address"
-                    name="address"
-                    placeholder="123 Main St"
-                    autoComplete="street-address"
-                    required
-                    fullWidth
-                    variant="outlined"
-                  />
-                </FormControl>
-              </Grid>
+            <FormControl fullWidth>
+              <FormLabel htmlFor="address">Address</FormLabel>
+              <TextField
+                id="address"
+                name="address"
+                placeholder="123 Main St"
+                autoComplete="street-address"
+                required
+                fullWidth
+                variant="outlined"
+              />
+            </FormControl>
+          </Grid>
         </Grid>
-        {/* 
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            /> */}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          onClick={validateInputs}
-        >
+
+        <Button type="submit" fullWidth variant="contained">
           Sign up
         </Button>
         <Typography sx={{ textAlign: "center" }}>
           Already have an account?{" "}
           <span>
             <Link to="/sign-in">
-              <MuiLink
-                variant="body2"
-                sx={{ alignSelf: "center", cursor: "pointer" }}
-              >
+              <MuiLink variant="body2" sx={{ alignSelf: "center", cursor: "pointer" }}>
                 Sign in
               </MuiLink>
             </Link>
           </span>
         </Typography>
-        {/* {successMsg.length > 0 ? (
-          <Alert severity="success">{successMsg}</Alert>
-        ) : (
-          ""
-        )}
-        {errorMsg.length > 0 ? <Alert severity="error">{errorMsg}</Alert> : ""}{" "} */}
       </Box>
     </Card>
   );

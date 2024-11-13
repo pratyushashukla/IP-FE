@@ -99,6 +99,7 @@ const ViewMealPlan = () => {
   };
 
   const handleSendEmail = () => {
+    console.log("handleSendEmail called"); 
     if (selectedMealPlan && selectedMealPlan._id && email) {
       dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email))
         .then(() => {
@@ -110,25 +111,12 @@ const ViewMealPlan = () => {
           console.error("Failed to send email:", error);
           alert("Failed to send email. Please try again.");
         });
+    } else {
+      console.error("ID or email is missing.");
+      alert("Please provide a valid ID and email address.");
     }
   };
-
-  const handleClearFilters = () => {
-    setInmateNameFilter("");
-    setMealTypeFilter("");
-    setMealPlanFilter("");
-    setAllergyFilter("");
-  };
-
-  // Filter mealPlans based on selected filters
-  const filteredMealPlans = mealPlansData.filter((mealPlan) => {
-    return (
-      (inmateNameFilter ? `${mealPlan.inmateId.firstName} ${mealPlan.inmateId.lastName}`.toLowerCase().includes(inmateNameFilter.toLowerCase()) : true) &&
-      (mealTypeFilter ? mealPlan.mealType === mealTypeFilter : true) &&
-      (mealPlanFilter ? mealPlan.mealPlan === mealPlanFilter : true) &&
-      (allergyFilter ? getAllergyNames(mealPlan.allergyId).some(allergy => allergy.toLowerCase().includes(allergyFilter.toLowerCase())) : true)
-    );
-  });
+  
 
   return (
     <Box mt={4}>
@@ -255,7 +243,12 @@ const ViewMealPlan = () => {
                     >
                       Download
                     </Button>
-                    <Button variant="contained" color="primary" onClick={() => handleOpenDialog("email")}>
+                    <Button variant="contained" color="primary" 
+                    onClick={() => {
+                      setSelectedMealPlan(mealPlan);
+                      handleOpenDialog("email");
+                      }}
+                    >
                       Email
                     </Button>
                   </Stack>
@@ -267,50 +260,9 @@ const ViewMealPlan = () => {
         </Table>
       </TableContainer>
 
-      {/* Dialogs for options */}
-      <Dialog open={dialogType === "delete"} onClose={handleCloseDialog}>
-        <DialogTitle>Delete Meal Plan</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this meal plan?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="secondary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={dialogType === "details"} onClose={handleCloseDialog}>
-        <DialogTitle>Meal Plan Details</DialogTitle>
-        <DialogContent>
-          <Details mealPlan={selectedMealPlan} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={dialogType === "update"} onClose={handleCloseDialog}>
-        <DialogTitle>Update Meal Plan</DialogTitle>
-        <DialogContent>
-          <UpdateMealPlan mealPlan={selectedMealPlan} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={dialogType === "email"} onClose={handleCloseDialog}>
-        <DialogTitle>Send Meal Plan via Email</DialogTitle>
+      {/* Dialog for Email */}
+      <Dialog open={Boolean(dialogType === "email")} onClose={handleCloseDialog} fullWidth maxWidth="md">
+        <DialogTitle>Send Email</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Enter the recipient's email address to send the meal plan.
@@ -320,22 +272,33 @@ const ViewMealPlan = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            fullWidth
-            variant="outlined"
-            InputProps={{
-              startAdornment: <InputAdornment position="start">@</InputAdornment>,
-            }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSendEmail} color="secondary">
-            Send Email
-          </Button>
+          <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
+          <Button onClick={handleSendEmail} color="primary">Send</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      {dialogType === "delete" && (
+        <Dialog open={true} onClose={handleCloseDialog}>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Are you sure you want to delete this meal plan?</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/* Direct Rendering of Details, Update, Preview, and DownloadMealPlan */}
       {dialogType === "details" && (
         <Details 
           open 
