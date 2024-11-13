@@ -205,7 +205,7 @@ const ViewVisitor = ({ handleUpdateModal }) => {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
-        <List>
+        <List sx={{ cursor: "pointer" }}>
           <ListItem button onClick={handleUpdate}>
             <ListItemText primary="Update" />
           </ListItem>

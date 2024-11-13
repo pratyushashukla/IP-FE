@@ -225,7 +225,7 @@ const ViewAppointments = ({ handleDetailsModal, handleUpdateModal }) => {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
-        <List>
+        <List sx={{ cursor: "pointer" }}>
           <ListItem button onClick={handleDetails}>
             <ListItemText primary="Details" />
           </ListItem>

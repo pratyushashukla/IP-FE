@@ -90,7 +90,7 @@ const StatusChip = styled(Chip)(({ theme, status }) => ({
   fontWeight: "bold",
 }));
 
-const ViewInmates = ({ handleUpdateModal }) => {
+const ViewInmates = ({ handleUpdateModal, handleDetailsModal }) => {
   const dispatch = useDispatch();
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
 
@@ -126,6 +126,11 @@ const ViewInmates = ({ handleUpdateModal }) => {
   const handleEdit = () => {
     handleCloseMenu();
     handleUpdateModal(selectedInmateId);
+  };
+
+  const handleDetails = () => {
+    handleCloseMenu();
+    handleDetailsModal(selectedInmateId);
   };
 
   const handleDelete = () => {
@@ -208,6 +213,9 @@ const ViewInmates = ({ handleUpdateModal }) => {
           }}
         >
           <List sx={{ cursor: "pointer" }}>
+            <ListItem button onClick={handleDetails}>
+              <ListItemText primary="Details" />
+            </ListItem>
             <ListItem button onClick={handleEdit}>
               <ListItemText primary="Update" />
             </ListItem>
