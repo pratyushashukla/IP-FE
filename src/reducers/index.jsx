@@ -7,6 +7,7 @@ import VisitorsReducer from "./VisitorsReducer";
 import VisitsReducer from "./VisitsReducer";
 import MealPlanReducer from "./MealPlanReducer";
 import AllergiesReducer from "./AllergiesReducer";
+import ReportReducer from './ReportReducer'; 
 
 export default combineReducers({
   GeneralReducer: GeneralReducer,
@@ -17,5 +18,6 @@ export default combineReducers({
   VisitsReducer: VisitsReducer,
   MealPlanReducer: MealPlanReducer,
   AllergiesReducer: AllergiesReducer,
+  ReportReducer: ReportReducer,
 
 });

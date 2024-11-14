@@ -28,6 +28,7 @@ import {
   GET_INMATES,
 } from "../../../actions/inmates/ActionCreators";
 import { formatDate } from "../../common/CommonFunctions";
+import ReportDialog from "../../report/ReportDialog";
 
 // Function to manipulate inmate data
 const manipulateInmatesData = (inmates) => {
@@ -101,6 +102,10 @@ const ViewInmates = ({ handleUpdateModal }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedInmateId, setSelectedInmateId] = useState(null);
 
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportInmateId, setReportInmateId] = useState(null);
+
+
   // Fetch inmates data from API when the component mounts
   useEffect(() => {
     dispatch(GET_INMATES());
@@ -134,6 +139,16 @@ const ViewInmates = ({ handleUpdateModal }) => {
     );
     setInmates(updatedInmates);
     dispatch(DELETE_INMATE(selectedInmateId, handleCloseMenu));
+  };
+
+  const handleOpenReportDialog = (inmateId) => {
+    setReportInmateId(inmateId);
+    setReportModalOpen(true);
+  };
+
+  const handleCloseReportDialog = () => {
+    setReportModalOpen(false);
+    setReportInmateId(null);
   };
 
   return (
@@ -214,9 +229,22 @@ const ViewInmates = ({ handleUpdateModal }) => {
             <ListItem button onClick={handleDelete}>
               <ListItemText primary="Delete" />
             </ListItem>
+            <ListItem button onClick={() => handleOpenReportDialog(selectedInmateId)}>
+              <ListItemText primary="Report" />
+            </ListItem>
           </List>
         </Popover>
       </StyledTableContainer>
+
+       {/* Report Dialog */}
+       {reportModalOpen && (
+        <ReportDialog
+          inmateId={reportInmateId}
+          open={reportModalOpen}
+          onClose={handleCloseReportDialog}
+        />
+      )}
+
     </Box>
   );
 };
