@@ -267,7 +267,6 @@ const ViewMealPlan = () => {
         </Table>
       </TableContainer>
 
-      {/* Dialogs for options */}
       <Dialog open={dialogType === "delete"} onClose={handleCloseDialog}>
         <DialogTitle>Delete Meal Plan</DialogTitle>
         <DialogContent>
