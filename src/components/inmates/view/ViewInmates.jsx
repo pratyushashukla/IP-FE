@@ -139,11 +139,12 @@ const ViewInmates = ({ handleUpdateModal, handleDetailsModal }) => {
   };
 
   const handleDelete = () => {
+    handleCloseMenu();
     const updatedInmates = inmates.filter(
       (inmate) => inmate._id !== selectedInmateId
     );
     setInmates(updatedInmates);
-    dispatch(DELETE_INMATE(selectedInmateId, handleCloseMenu));
+    dispatch(DELETE_INMATE(selectedInmateId));
   };
 
   const handleOpenReportDialog = (inmateId) => {
