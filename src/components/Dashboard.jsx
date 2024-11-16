@@ -180,7 +180,7 @@ function Dashboard() {
             { title: "Tasks", description: "Manage and view assigned tasks.", link: "/task" },
             { title: "Visits", description: "Schedule and manage visits for inmates.", link: "/visit" },
             { title: "Inmates", description: "View information and manage inmate records.", link: "/inmate" },
-            { title: "Forms", description: "Access and submit necessary forms.", link: "/form" },
+            { title: "Meal Plan", description: "Manage inmate meal plans, preferences, and restrictions..", link: "/meal" },
           ].map((item, index) => (
             <Card key={index} style={styles.card}>
               <CardContent style={styles.cardContent}>

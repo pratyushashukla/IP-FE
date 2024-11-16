@@ -100,22 +100,23 @@ export default function SignUpCard() {
       setEmailErrorMessage("");
     }
 
-    // Password validation
     const passwordValue = password.value;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;"'<>?,./\\|`~\-]).{6,}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;"'<>?,./\\|`~\-]).+$/;
 
-    if (!passwordValue || passwordValue.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else if (!passwordRegex.test(passwordValue)) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must contain at least one uppercase letter, one special symbol, and one number.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
+// Password validation
+if (!passwordValue || passwordValue.length === 0) {
+  setPasswordError(true);
+  setPasswordErrorMessage("Password cannot be empty.");
+  isValid = false;
+} else if (!passwordRegex.test(passwordValue)) {
+  setPasswordError(true);
+  setPasswordErrorMessage("Password must contain at least one uppercase letter, one special character, and one number.");
+  isValid = false;
+} else {
+  setPasswordError(false);
+  setPasswordErrorMessage("");
+}
+
 
     return isValid;
   };
