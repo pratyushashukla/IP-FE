@@ -56,22 +56,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
-function InmateDetails({ open, onClose, selectedInmateId }) {
-  const dispatch = useDispatch();
-  const [localInmateData, setLocalInmateData] = useState({});
+
+function InmateDetails({ open, onClose }) {
+
   const inmateData = useSelector((state) => state.InmatesReducer.inmateById);
-
-  useEffect(() => {
-    dispatch(GET_INMATE_BY_ID(selectedInmateId));
-  }, [dispatch, selectedInmateId]);
-
-  useEffect(() => {
-    if (inmateData) {
-      setLocalInmateData(inmateData);
-    }
-  }, [inmateData]);
-
-  console.log("localInmateData", localInmateData);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
@@ -100,8 +88,8 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
               <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
                 Name:
               </Typography>
-              <Typography>{`${localInmateData.firstName || "N/A"} ${
-                localInmateData.lastName || "N/A"
+              <Typography>{`${inmateData?.firstName || "N/A"} ${
+                inmateData?.lastName || "N/A"
               }`}</Typography>
             </Grid>
             <Grid item xs={6}>
@@ -109,8 +97,8 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                 Date of Birth:
               </Typography>
               <Typography>
-                {localInmateData.dateOfBirth
-                  ? new Date(localInmateData.dateOfBirth).toLocaleDateString()
+                {inmateData?.dateOfBirth
+                  ? new Date(inmateData?.dateOfBirth).toLocaleDateString()
                   : "N/A"}
               </Typography>
             </Grid>
@@ -118,26 +106,26 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
               <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
                 Gender:
               </Typography>
-              <Typography>{localInmateData.gender || "N/A"}</Typography>
+              <Typography>{inmateData?.gender || "N/A"}</Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
                 Contact Number:
               </Typography>
-              <Typography>{localInmateData.contactNumber || "N/A"}</Typography>
+              <Typography>{inmateData?.contactNumber || "N/A"}</Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
                 Status:
               </Typography>
-              <Typography>{localInmateData.status || "N/A"}</Typography>
+              <Typography>{inmateData?.status || "N/A"}</Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
                 Sentence Duration:
               </Typography>
               <Typography>
-                {localInmateData.sentenceDuration || "N/A"} months
+                {inmateData?.sentenceDuration || "N/A"} months
               </Typography>
             </Grid>
           </Grid>
@@ -145,7 +133,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
 
         <Divider sx={{ my: 2 }} />
 
-        {localInmateData.mealPlan && (
+        {inmateData?.mealPlan && (
           <Box sx={{ mb: 2 }}>
             <Typography
               variant="h6"
@@ -159,7 +147,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                   Meal Type:
                 </Typography>
                 <Typography>
-                  {localInmateData.mealPlan.mealType || "N/A"}
+                  {inmateData?.mealPlan.mealType || "N/A"}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -167,7 +155,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                   Meal Plan:
                 </Typography>
                 <Typography>
-                  {localInmateData.mealPlan.mealPlan || "N/A"}
+                  {inmateData?.mealPlan.mealPlan || "N/A"}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -175,14 +163,14 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                   Dietary Preferences:
                 </Typography>
                 <Typography>
-                  {localInmateData.mealPlan.dietaryPreferences || "N/A"}
+                  {inmateData?.mealPlan.dietaryPreferences || "N/A"}
                 </Typography>
               </Grid>
             </Grid>
 
             {/* Allergies Table */}
-            {localInmateData.mealPlan.allergyId &&
-              localInmateData.mealPlan.allergyId.length > 0 && (
+            {inmateData?.mealPlan.allergyId &&
+              inmateData?.mealPlan.allergyId.length > 0 && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                     Allergies:
@@ -196,7 +184,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {localInmateData.mealPlan.allergyId.map(
+                        {inmateData?.mealPlan.allergyId.map(
                           (allergy, index) => (
                             <StyledTableRow key={index}>
                               <StyledTableCell>
@@ -228,7 +216,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
           >
             Appointments
           </Typography>
-          <AppointmentsTable appointments={localInmateData.appointments} />
+          <AppointmentsTable appointments={inmateData?.appointments} />
           {/* <StyledTableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -242,7 +230,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {localInmateData.appointments?.map((appointment) => (
+                {inmateData?.appointments?.map((appointment) => (
                   <StyledTableRow key={appointment._id}>
                     <StyledTableCell>
                       {new Date(appointment.startTime).toLocaleString()}
@@ -290,7 +278,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {localInmateData.visitors?.map((visitor) => (
+                {inmateData?.visitors?.map((visitor) => (
                   <StyledTableRow key={visitor._id}>
                     <Tooltip
                       title={`${visitor.firstname} ${visitor.lastname}`}
@@ -333,7 +321,7 @@ function InmateDetails({ open, onClose, selectedInmateId }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {localInmateData.tasksAssigned?.map((task) => (
+                {inmateData?.tasksAssigned?.map((task) => (
                   <StyledTableRow key={task._id}>
                     <Tooltip title={task.taskId?.title} arrow>
                       <StyledTableCell>{task.taskId?.title}</StyledTableCell>
@@ -445,7 +433,7 @@ function AppointmentsTable({ appointments }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {appointments.map((appointment) => (
+          {appointments?.map((appointment) => (
             <AppointmentRow key={appointment._id} appointment={appointment} />
           ))}
         </TableBody>
