@@ -1,11 +1,22 @@
 import ApiService, { handleNetworkError, dispatchAction } from "../../middleware/ApiService";
-import { INMATESDATA } from "./Actions";
+import { INMATESDATA, INMATEBYID } from "./Actions";
 
 export const GET_INMATES = () => async (dispatch) => {
   try {
     const apiResponse = await ApiService.get(`/inmates`);
     if (apiResponse) {
       dispatchAction(dispatch, INMATESDATA, apiResponse.data);
+    }
+  } catch (error) {
+    handleNetworkError(error);
+  }
+};
+
+export const GET_INMATE_BY_ID = (inmateId) => async (dispatch) => {
+  try {
+    const apiResponse = await ApiService.get(`/inmates/${inmateId}`);
+    if (apiResponse) {
+      dispatchAction(dispatch, INMATEBYID, apiResponse.data.result);
     }
   } catch (error) {
     handleNetworkError(error);
