@@ -42,7 +42,7 @@ const ProfilePage = () => {
         );
         const data = await response.json();
         setProfile({
-          firstName: data.user.firstname || "", // Default to empty string if null/undefined
+          firstName: data.user.firstname || "",
           lastName: data.user.lastname || "",
           phone: data.user.phone || "",
           address: data.user.address || "",
@@ -80,30 +80,39 @@ const ProfilePage = () => {
 
   return (
     <Stack
-      direction={{ xs: "column", md: "row" }}
+      direction="column"
       sx={{
         justifyContent: "center",
         alignItems: "center",
-        gap: { xs: 6, sm: 12 },
-        p: { xs: 2, sm: 4 },
-        m: "auto",
-        flexGrow: 1,
+        height: "100vh",
+        backgroundColor: "white", // White background for the page
       }}
     >
       <Box
         sx={{
-          backgroundColor: "hsl(220, 35%, 97%)",
-          borderRadius: 2,
-          boxShadow: 3,
+          backgroundColor: "#64b5f6", // Blue background for the container
+          borderRadius: 4,            // Rounded corners
+          boxShadow: 6,               // Larger shadow for a more prominent look
           padding: 4,
           width: { xs: "90%", sm: "600px" },
           display: "flex",
           flexDirection: "column",
+          color: "white",             // White text for readability
+          textAlign: "left",          // Align text to the left for labels
+          border: "2px solid #0c6fb2", // Border color matching the nav panel color
+          borderRadius: "8px",         // Rounded border for a polished look
+          transition: "all 0.3s ease-in-out", // Smooth transition for hover effects
+          background: "linear-gradient(145deg, #1976d2, #1565c0)", // Gradient effect
+          "&:hover": {
+            transform: "scale(1.05)", // Slight zoom effect on hover
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)", // Bigger shadow on hover
+          },
         }}
       >
-        <Typography variant="h4" align="center" gutterBottom>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
           Profile
         </Typography>
+
         {["firstName", "lastName", "phone", "address"].map((field) => (
           <Stack
             key={field}
@@ -111,14 +120,21 @@ const ProfilePage = () => {
             alignItems="center"
             spacing={2}
             marginBottom={2}
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 2,
+            }}
           >
             <Typography
               variant="body1"
-              sx={{ width: "30%", fontWeight: "bold" }}
+              sx={{
+                width: "40%",
+                fontWeight: "bold",
+                color: "white", // White color for labels
+              }}
             >
-              {field.charAt(0).toUpperCase() +
-                field.slice(1).replace("Name", " Name")}
-              :
+              {field.charAt(0).toUpperCase() + field.slice(1).replace("Name", " Name")}
             </Typography>
             {isEditing[field] ? (
               <TextField
@@ -126,32 +142,71 @@ const ProfilePage = () => {
                 name={field}
                 value={profile[field]}
                 onChange={handleChange}
-                sx={{ flex: 1 }}
+                sx={{
+                  flex: 1,
+                  backgroundColor: "#ffffff",
+                  borderRadius: 2,
+                  marginLeft: 2,
+                }}
+                InputProps={{ style: { color: "black" } }}
               />
             ) : (
               <Typography variant="body1" sx={{ flex: 1 }}>
                 {profile[field]}
               </Typography>
             )}
-            <Button variant="contained" onClick={() => handleEdit(field)}>
-              {isEditing[field] ? "Editing" : "Edit"}
+            <Button
+              variant="contained"
+              onClick={() => handleEdit(field)}
+              sx={{
+                backgroundColor: "#0d47a1",
+                "&:hover": {
+                  backgroundColor: "#1565c0", // Hover color
+                },
+              }}
+            >
+              {isEditing[field] ? "Edit" : "Edit"}
             </Button>
           </Stack>
         ))}
-        <Stack direction="row" alignItems="center" spacing={2} marginBottom={2}>
-          <Typography variant="body1" sx={{ width: "30%", fontWeight: "bold" }}>
+
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={2}
+          marginBottom={2}
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              width: "40%",
+              fontWeight: "bold",
+              color: "white", // White color for email label
+            }}
+          >
             Email:
           </Typography>
           <Typography variant="body1" sx={{ flex: 1 }}>
             {profile.email}
-          </Typography>{" "}
-          {/* Display email as plain text */}
+          </Typography>
         </Stack>
+
         <Button
           variant="contained"
           color="primary"
           onClick={handleSave}
-          sx={{ width: "100%", marginTop: 2 }}
+          sx={{
+            width: "100%",
+            marginTop: 2,
+            backgroundColor: "#0d47a1",
+            "&:hover": {
+              backgroundColor: "#1565c0",
+            },
+          }}
         >
           Save Changes
         </Button>
