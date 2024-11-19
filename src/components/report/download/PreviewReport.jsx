@@ -34,56 +34,88 @@ const PreviewReport = ({ open, onClose, inmateId, reportType }) => {
   // Fetch report data when the dialog opens
   useEffect(() => {
     if (open && inmateId && reportType) {
+      console.log('Fetching report data for inmateId:', inmateId, 'with reportType:', reportType);
+      
       setLoading(true);
+      
       dispatch(GET_REPORT_BY_INMATE_ID(inmateId, reportType))
         .then((data) => {
+          console.log('Fetched data:', data);
+  
+          // Inmate Information
+          const inmateInfo = {
+            name: `${data.inmate.firstName} ${data.inmate.lastName}`,
+            dob: new Date(data.inmate.dateOfBirth).toLocaleDateString(),
+            gender: data.inmate.gender,
+            contact: data.inmate.contactNumber,
+            sentenceDuration: `${data.inmate.sentenceDuration} months`,
+          };
+  
+          // Task Information: Check if tasks exist and are an array
+          const taskInfo = (data.tasks && Array.isArray(data.tasks))
+            ? data.tasks.map((task) => ({
+                title: task.taskId?.title || 'N/A',
+                description: task.taskId?.description || 'N/A',
+                assignedBy: `${task.taskId?.assignedBy?.firstname || 'N/A'} ${task.taskId?.assignedBy?.lastname || 'N/A'}`,
+                status: task.completionStatus ? 'Completed' : 'Pending',
+                dueDate: task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A',
+              }))
+            : []; // Default to an empty array if no tasks
+  
+          // Meal Information: Ensure meals exist and are an array
+          const mealInfo = (data.meals && Array.isArray(data.meals))
+            ? data.meals.map((meal) => ({
+                type: meal.mealType,
+                plan: meal.mealPlan,
+                dietaryPreferences: meal.dietaryPreferences || 'N/A',
+                allergies: meal.allergyId && meal.allergyId.length > 0
+                  ? meal.allergyId.map((a) => a.allergyName).join(', ')
+                  : 'None',
+              }))
+            : []; // Default to an empty array if no meals
+  
+          console.log('Meal Info:', mealInfo); // Log meal data for debugging
+  
+          // Visitor Information: Check if visitors exist and are an array
+          const visitorInfo = (data.visitors && Array.isArray(data.visitors))
+            ? data.visitors.map((visitor) => ({
+                name: `${visitor.firstname} ${visitor.lastname}`,
+                relationship: visitor.relationship,
+                contact: visitor.contactNumber,
+                appointments: (data.appointments && Array.isArray(data.appointments))
+                  ? data.appointments
+                      .filter((appointment) => appointment.visitorId._id === visitor._id)
+                      .map((appointment) => ({
+                        startTime: new Date(appointment.startTime).toLocaleTimeString(),
+                        estimatedEndTime: new Date(appointment.estimatedEndTime).toLocaleTimeString(),
+                        status: appointment.status,
+                        remarks: appointment.remarks || 'N/A',
+                        identityVerified: appointment.identityVerified ? 'Yes' : 'No',
+                        flaggedForSecurity: appointment.flaggedForSecurity ? 'Yes' : 'No',
+                      }))
+                  : [] // Default to empty array if no appointments
+              }))
+            : []; // Default to empty array if no visitors
+  
+          // Final report details
           setReportDetails({
-            inmate: {
-              name: `${data.inmate.firstName} ${data.inmate.lastName}`,
-              dob: new Date(data.inmate.dateOfBirth).toLocaleDateString(),
-              gender: data.inmate.gender,
-              contact: data.inmate.contactNumber,
-              sentenceDuration: `${data.inmate.sentenceDuration} months`,
-            },
-            tasks: data.tasks.map((task) => ({
-              title: task.taskId?.title || 'N/A',
-              description: task.taskId?.description || 'N/A',
-              assignedBy: `${task.taskId?.assignedBy?.firstname || 'N/A'} ${task.taskId?.assignedBy?.lastname || 'N/A'}`,
-              status: task.completionStatus ? 'Completed' : 'Pending',
-              dueDate: task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A',
-            })),
-            meals: data.meals.map((meal) => ({
-              type: meal.mealType,
-              plan: meal.mealPlan,
-              dietaryPreferences: meal.dietaryPreferences || 'N/A',
-              allergies: meal.allergyId.length > 0
-                ? meal.allergyId.map((a) => a.allergyName).join(', ')
-                : 'None',
-            })),
-            visitors: data.visitors.map((visitor) => ({
-              name: `${visitor.firstname} ${visitor.lastname}`,
-              relationship: visitor.relationship,
-              contact: visitor.contactNumber,
-              appointments: data.appointments
-                .filter((appointment) => appointment.visitorId._id === visitor._id)
-                .map((appointment) => ({
-                  startTime: new Date(appointment.startTime).toLocaleTimeString(),
-                  estimatedEndTime: new Date(appointment.estimatedEndTime).toLocaleTimeString(),
-                  status: appointment.status,
-                  remarks: appointment.remarks || 'N/A',
-                  identityVerified: appointment.identityVerified ? 'Yes' : 'No',
-                  flaggedForSecurity: appointment.flaggedForSecurity ? 'Yes' : 'No',
-                })),
-            })),
+            inmate: inmateInfo,
+            tasks: taskInfo,
+            meals: mealInfo,
+            visitors: visitorInfo,
           });
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('Error fetching report data:', error);
           setReportDetails({ inmate: {}, tasks: [], meals: [], visitors: [] });
         })
         .finally(() => setLoading(false));
+    } else {
+      console.log('Invalid parameters: open:', open, 'inmateId:', inmateId, 'reportType:', reportType);
     }
   }, [open, inmateId, reportType, dispatch]);
-
+  
+  
   // Render conditional sections based on reportType
   const renderSection = (title, content) => (
     <Box mb={2}>

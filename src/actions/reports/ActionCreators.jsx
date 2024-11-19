@@ -113,6 +113,7 @@ export const GET_REPORT_BY_INMATE_ID = (inmateId, reportType) => async (dispatch
   try {
     const response = await ApiService.get(`/reports/${inmateId}/${reportType}`);
     if (response.status === 200) {
+      console.log("Report data ", response.data);
       dispatchAction(dispatch, setReportData, response.data); // Store fetched report data in Redux
       return response.data; // Ensure that the data is returned to the component
     } else {
