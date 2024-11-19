@@ -50,10 +50,24 @@ export const EDIT_INMATE = (id, inmate, handleDialog) => async (dispatch) => {
 export const DELETE_INMATE = (id) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.delete(`/inmates/${id}`);
-    if (apiResponse) {
-      dispatch(GET_INMATES()); // Refresh inmates after deletion
+  
+    if (apiResponse.status === 200) {
+      dispatch(GET_INMATES()); // Refresh the inmate list after deletion
+    } else {
+      // If the response is not 200, show the backend message
+      alert(apiResponse.data.message || "An error occurred while deleting the inmate.");
     }
   } catch (error) {
-    handleNetworkError(error);
+    if (error.response && error.response.status === 400) {
+      // Catching 400 error and displaying the backend message
+      alert(error.response.data.message || "Bad Request: This inmate is associated with other data.");
+    } else {
+      handleNetworkError(error); // For other errors (network, 500, etc.)
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message); // Show the message from the backend
+      } else {
+        alert("An unexpected error occurred.");
+      }
+    }
   }
 };

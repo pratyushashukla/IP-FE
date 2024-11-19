@@ -68,6 +68,10 @@ const ViewVisitor = ({ handleUpdateModal }) => {
     contactNumber: "",
   });
 
+  // State for visitor delete popup messages
+  const [visitorPopupMessage, setVisitorPopupMessage] = useState("");
+  const [isVisitorPopupOpen, setIsVisitorPopupOpen] = useState(false);
+
   useEffect(() => {
     dispatch(GET_VISITORS());
   }, [dispatch]);
@@ -114,9 +118,17 @@ const ViewVisitor = ({ handleUpdateModal }) => {
     setOpenDialog(true);
   };
 
-  const handleConfirmDelete = () => {
-    dispatch(DELETE_VISITOR(selectedVisitorId, handleCloseMenu));
-    setOpenDialog(false);
+  const handleConfirmDelete = async () => {
+    try {
+      const response = await dispatch(DELETE_VISITOR(selectedVisitorId));
+      setVisitorPopupMessage(response?.message || "Visitor deleted successfully.");
+    } catch (error) {
+      setVisitorPopupMessage("An error occurred while deleting the visitor.");
+    } finally {
+      setIsVisitorPopupOpen(true);
+      setOpenDialog(false); // Close the delete confirmation dialog
+      handleCloseMenu(); // Close the options menu after deletion
+    }
   };
 
   const handleCancelDelete = () => {
@@ -133,7 +145,6 @@ const ViewVisitor = ({ handleUpdateModal }) => {
           name="name"
           value={searchParams.name}
           onChange={handleSearchChange}
-          // disabled={isAnyFieldActive && !searchParams.name}
         />
         <TextField
           label="Inmate Name"
@@ -141,7 +152,6 @@ const ViewVisitor = ({ handleUpdateModal }) => {
           name="inmateName"
           value={searchParams.inmateName}
           onChange={handleSearchChange}
-          // disabled={isAnyFieldActive && !searchParams.inmateName}
         />
         <TextField
           label="Contact Number"
@@ -149,13 +159,12 @@ const ViewVisitor = ({ handleUpdateModal }) => {
           name="contactNumber"
           value={searchParams.contactNumber}
           onChange={handleSearchChange}
-          // disabled={isAnyFieldActive && !searchParams.contactNumber}
         />
         <Button variant="contained" color="primary" onClick={handleSearch}>
           Search
         </Button>
         <Tooltip title="Clear Search">
-          <IconButton color="secondary" onClick={handleClearSearch} disabled={isAnyFieldActive ? false : true}>
+          <IconButton color="secondary" onClick={handleClearSearch} disabled={!isAnyFieldActive}>
             <ClearIcon />
           </IconButton>
         </Tooltip>
@@ -215,6 +224,7 @@ const ViewVisitor = ({ handleUpdateModal }) => {
         </List>
       </Popover>
 
+      {/* Confirmation Dialog for Deleting a Visitor */}
       <Dialog
         open={openDialog}
         onClose={handleCancelDelete}
@@ -236,6 +246,8 @@ const ViewVisitor = ({ handleUpdateModal }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+     
     </Box>
   );
 };
