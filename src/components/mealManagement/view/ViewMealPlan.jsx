@@ -106,24 +106,38 @@ const ViewMealPlan = () => {
     }
   };
 
-  const handleSendEmail = () => {
+  const handleSendEmail = async () => {
     if (selectedMealPlan && selectedMealPlan._id && email) {
-      dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email))
-        .then(() => {
-          setSnackbarMessage(`Email sent to: ${email}`);
-          setSnackbarSeverity("success");
-          setOpenSnackbar(true);  // Show the Snackbar
-          handleCloseDialog();
-          setEmail("");
-        })
-        .catch((error) => {
-          console.error("Failed to send email:", error);
-          setSnackbarMessage("Failed to send email. Please try again.");
-          setSnackbarSeverity("error");
-          setOpenSnackbar(true);  // Show the Snackbar
-        });
+      try {
+        // Show loading state or send immediate response to user
+        setSnackbarMessage("Sending email...");
+        setSnackbarSeverity("info");
+        setOpenSnackbar(true);  // Show the Snackbar with info
+  
+        // Dispatch email action asynchronously without waiting for the result
+        await dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email));
+  
+        // On success, show a success snackbar
+        setSnackbarMessage(`Email sent to: ${email}`);
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
+  
+        handleCloseDialog();  // Close the dialog after sending email
+  
+        setEmail(""); // Clear the email field
+      } catch (error) {
+        // Show error message in Snackbar if the email fails to send
+        setSnackbarMessage("Failed to send email. Please try again.");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+      }
+    } else {
+      setSnackbarMessage("Please ensure meal plan and email are valid.");
+      setSnackbarSeverity("warning");
+      setOpenSnackbar(true);
     }
   };
+  
 
   const handleClearFilters = () => {
     setInmateNameFilter("");
@@ -267,7 +281,10 @@ const ViewMealPlan = () => {
                     >
                       Download
                     </Button>
-                    <Button variant="contained" color="primary" onClick={() => handleOpenDialog("email")}>
+                    <Button variant="contained" color="primary" onClick={() =>  {
+                        setSelectedMealPlan(mealPlan);  
+                        handleOpenDialog("email");
+                      }}>
                       Email
                     </Button>
                   </Stack>
@@ -342,20 +359,21 @@ const ViewMealPlan = () => {
           <Button onClick={handleCloseDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleSendEmail} color="secondary">
+          <Button mealPlan={selectedMealPlan} onClick={handleSendEmail} color="secondary">
             Send Email
           </Button>
         </DialogActions>
       </Dialog>
       <Snackbar
         open={openSnackbar}
-        autoHideDuration={6000}  // How long the snackbar stays on screen (in milliseconds)
-        onClose={() => setOpenSnackbar(false)}  // Closes Snackbar after the duration
+        autoHideDuration={6000} // Auto-hide after 6 seconds
+        onClose={() => setOpenSnackbar(false)} // Close the snackbar
       >
         <Alert onClose={() => setOpenSnackbar(false)} severity={snackbarSeverity}>
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
 
       {dialogType === "details" && (
         <Details 
