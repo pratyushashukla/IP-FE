@@ -65,7 +65,27 @@ const ProfilePage = () => {
   };
 
   const handleSave = () => {
-    dispatch(EDITUSER(localStorage.getItem("userId"), profile));
+    const { firstName, lastName, phone, address } = profile;
+
+  // Validate phone number
+  if (phone.length !== 10 || !/^\d+$/.test(phone)) {
+    alert("Invalid phone number. Please enter a 10-digit phone number.");
+    return;
+  }
+
+  // Validate empty fields
+  if (!firstName || !lastName || !phone || !address) {
+    alert("Please fill in all fields.");
+    return;
+  }
+    const updatedProfile = {
+      firstname: profile.firstName,
+      lastname: profile.lastName,
+      phone: profile.phone,
+      address: profile.address,
+    };
+  
+    dispatch(EDITUSER(localStorage.getItem("userId"), updatedProfile));
 
     setTimeout(() => {
       alert("Profile updated successfully!");
@@ -91,7 +111,6 @@ const ProfilePage = () => {
       <Box
         sx={{
           backgroundColor: "#64b5f6", // Blue background for the container
-          borderRadius: 4,            // Rounded corners
           boxShadow: 6,               // Larger shadow for a more prominent look
           padding: 4,
           width: { xs: "90%", sm: "600px" },
