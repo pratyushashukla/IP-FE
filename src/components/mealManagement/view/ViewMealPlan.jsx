@@ -25,6 +25,8 @@ import {
   Box,
   InputAdornment,
   Select,
+  Snackbar, 
+  Alert,
   MenuItem as MuiMenuItem
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -55,6 +57,12 @@ const ViewMealPlan = () => {
   const [mealTypeFilter, setMealTypeFilter] = useState("");
   const [mealPlanFilter, setMealPlanFilter] = useState("");
   const [allergyFilter, setAllergyFilter] = useState("");
+
+
+  const [openSnackbar, setOpenSnackbar] = useState(false);  // Controls Snackbar visibility
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Message content for the Snackbar
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // 'success' or 'error' for different message styles
+
 
   useEffect(() => {
     dispatch(GET_MEALPLAN());
@@ -102,13 +110,17 @@ const ViewMealPlan = () => {
     if (selectedMealPlan && selectedMealPlan._id && email) {
       dispatch(EMAIL_MEALPLAN(selectedMealPlan._id, email))
         .then(() => {
-          alert(`Email sent to: ${email}`);
+          setSnackbarMessage(`Email sent to: ${email}`);
+          setSnackbarSeverity("success");
+          setOpenSnackbar(true);  // Show the Snackbar
           handleCloseDialog();
           setEmail("");
         })
         .catch((error) => {
           console.error("Failed to send email:", error);
-          alert("Failed to send email. Please try again.");
+          setSnackbarMessage("Failed to send email. Please try again.");
+          setSnackbarSeverity("error");
+          setOpenSnackbar(true);  // Show the Snackbar
         });
     }
   };
@@ -335,6 +347,16 @@ const ViewMealPlan = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}  // How long the snackbar stays on screen (in milliseconds)
+        onClose={() => setOpenSnackbar(false)}  // Closes Snackbar after the duration
+      >
+        <Alert onClose={() => setOpenSnackbar(false)} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
       {dialogType === "details" && (
         <Details 
           open 

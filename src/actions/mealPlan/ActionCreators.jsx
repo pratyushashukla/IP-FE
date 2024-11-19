@@ -31,6 +31,7 @@ export const GET_MEALPLANS_WITH_PAGINATION = (page, limit) => async (dispatch) =
 // Add new meal plan
 export const ADD_MEALPLAN = (mealPlan, onClose) => async (dispatch) => {
   try {
+    console.log("Meal Plan Payload:", mealPlan);
     const apiResponse = await ApiService.post(`/meals`, mealPlan);
     console.log("API response - create meal plan", apiResponse);
     if (apiResponse.status === 201) {
@@ -43,14 +44,28 @@ export const ADD_MEALPLAN = (mealPlan, onClose) => async (dispatch) => {
 };
 
 // Update existing meal plan
-export const UPDATE_MEALPLAN = (mealPlan, handleUpdateModal) => async (dispatch) => {
+export const UPDATE_MEALPLAN = (id, mealPlan, handleUpdateModal) => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.patch(`/meals/${mealPlan._id}`, mealPlan);
+    // Send PATCH request to update the meal plan
+    const apiResponse = await ApiService.patch(`/meals/${id}`, mealPlan);
+
     if (apiResponse.status === 200) {
+      console.log("Meal Plan Updated Successfully:", apiResponse.data);
+
+      // Dispatch to fetch updated meal plans
       dispatch(GET_MEALPLAN());
-      handleUpdateModal();
+
+      // Close the update modal
+      if (handleUpdateModal) {
+        handleUpdateModal();
+      }
+    } else {
+      console.error("Unexpected status code:", apiResponse.status);
     }
   } catch (error) {
+    console.error("Error updating meal plan:", error);
+
+    // Ensure the error handler displays or logs meaningful feedback
     handleNetworkError(error);
   }
 };
@@ -128,10 +143,38 @@ export const DOWNLOAD_MEALPLAN = (id) => async () => {
 export const EMAIL_MEALPLAN = (id, email) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.post(`/meals/${id}/email`, { email });
+    console.log("API Response:", apiResponse); // Check the response from API
+
     if (apiResponse.status === 200) {
-      console.log("Email sent successfully");
+      dispatch({ type: "EMAIL_SENT", payload: apiResponse.data.message });
+    } else {
+      // Handle non-200 status codes
+      console.error("Error: Unexpected API response status", apiResponse.status);
+      dispatch({
+        type: "EMAIL_FAILED",
+        payload: "Failed to send email, please try again later."
+      });
     }
   } catch (error) {
-    handleNetworkError(error);
+    // Log the error details to the console
+    console.error("Failed to send email:", error);
+
+    // Optionally, you can create a custom error handling mechanism if needed
+    if (error.response) {
+      // Handle API error response
+      console.error("API Error Response:", error.response);
+    } else if (error.request) {
+      // No response from server
+      console.error("No response received:", error.request);
+    } else {
+      // Error setting up the request
+      console.error("Error setting up request:", error.message);
+    }
+
+    dispatch({
+      type: "EMAIL_FAILED",
+      payload: "Failed to send email, please try again later."
+    });
   }
 };
+

@@ -11,25 +11,29 @@ import {
   FormLabel,
   Box,
   MenuItem,
+  Typography,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { UPDATE_MEALPLAN, GET_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
-import AllergyDropdown from "../AllergyDropdown"; // Import the custom AllergyDropdown
+import { UPDATE_MEALPLAN } from "../../../actions/mealplan/ActionCreators";
+import AllergyDropdown from "../AllergyDropdown";
 
 const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
   const dispatch = useDispatch();
   const mealPlanData = useSelector((state) => state.MealPlanReducer.mealPlanData);
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
-  const allergiesData = useSelector((state) => state.AllergiesReducer.allergiesData || []);
+  const allergies = useSelector((state) => state.AllergiesReducer.allergiesData || []);
 
   const [mealPlan, setMealPlan] = useState({
+    _id: "",
     inmateId: "",
     mealType: "",
     mealPlan: "",
-    allergy: [], 
+    allergy: [],
     dietaryPreferences: "N/A",
   });
+
   const [inmateName, setInmateName] = useState("N/A");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (selectedMealPlanId) {
@@ -39,12 +43,12 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
         const inmate = inmatesData.find((inmate) => inmate._id === inmateId);
         setInmateName(inmate ? `${inmate.firstName} ${inmate.lastName}` : "N/A");
 
-        // Sets allergies with IDs directly
         setMealPlan({
+          _id: selectedMealPlan._id, // Include ID for update
           inmateId: selectedMealPlan.inmateId,
           mealType: selectedMealPlan.mealType || "",
           mealPlan: selectedMealPlan.mealPlan || "",
-          allergy: selectedMealPlan.allergyId || [], // Set IDs directly here
+          allergy: selectedMealPlan.allergyId || [], // Store allergy IDs
           dietaryPreferences: selectedMealPlan.dietaryPreferences || "N/A",
         });
       }
@@ -60,13 +64,33 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
   };
 
   const handleAllergyChange = (selectedAllergies) => {
+    const allergyIds = selectedAllergies.map((allergy) => allergy._id);
     setMealPlan((prevMealPlan) => ({
       ...prevMealPlan,
-      allergy: selectedAllergies,
+      allergy: allergyIds,
     }));
   };
 
-  const isFormValid = mealPlan.mealType && mealPlan.mealPlan;
+  const handleSubmit = async () => {
+    if (mealPlan.mealType && mealPlan.mealPlan) {
+      try {
+        const payload = {
+          mealPlan: mealPlan.mealPlan,
+          mealType: mealPlan.mealType,
+          dietaryPreferences: mealPlan.dietaryPreferences || "None",
+          allergyId: mealPlan.allergy.filter((id) => id), // Validate allergy IDs
+        };
+        console.log("Submitting Payload:", payload); // Debugging
+
+        await dispatch(UPDATE_MEALPLAN(mealPlan._id, payload, onClose));
+        setErrorMessage("");
+      } catch (error) {
+        const message =
+          error.response?.data?.message || "An error occurred while updating.";
+        setErrorMessage(message);
+      }
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -74,12 +98,16 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
       <DialogContent>
         <Box>
           <Grid container spacing={2}>
-            {/* Inmate Name (Read-only) */}
+            {errorMessage && (
+              <Grid item xs={12}>
+                <Typography color="error" variant="body2">
+                  {errorMessage}
+                </Typography>
+              </Grid>
+            )}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="inmateName" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Inmate Name
-                </FormLabel>
+                <FormLabel htmlFor="inmateName">Inmate Name</FormLabel>
                 <TextField
                   id="inmateName"
                   name="inmateName"
@@ -91,13 +119,9 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
                 />
               </FormControl>
             </Grid>
-
-            {/* Meal Type Field */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="mealType" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Meal Type
-                </FormLabel>
+                <FormLabel htmlFor="mealType">Meal Type</FormLabel>
                 <TextField
                   id="mealType"
                   name="mealType"
@@ -105,7 +129,6 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
                   onChange={handleInputChange}
                   select
                   variant="outlined"
-                  required
                 >
                   <MenuItem value="Vegetarian">Vegetarian</MenuItem>
                   <MenuItem value="Halal">Halal</MenuItem>
@@ -114,13 +137,9 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
                 </TextField>
               </FormControl>
             </Grid>
-
-            {/* Meal Plan Duration Field */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="mealPlan" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Meal Plan Duration
-                </FormLabel>
+                <FormLabel htmlFor="mealPlan">Meal Plan Duration</FormLabel>
                 <TextField
                   id="mealPlan"
                   name="mealPlan"
@@ -128,33 +147,24 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
                   onChange={handleInputChange}
                   select
                   variant="outlined"
-                  required
                 >
                   <MenuItem value="Monthly">Monthly</MenuItem>
                   <MenuItem value="Weekly">Weekly</MenuItem>
                 </TextField>
               </FormControl>
             </Grid>
-
-            {/* Allergy Dropdown */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="allergy" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Allergy
-                </FormLabel>
+                <FormLabel htmlFor="allergy">Allergy</FormLabel>
                 <AllergyDropdown
-                  value={mealPlan.allergy} // This is now a list of allergy IDs
+                  value={allergies.filter((a) => mealPlan.allergy.includes(a._id))}
                   onChange={handleAllergyChange}
                 />
               </FormControl>
             </Grid>
-
-            {/* Dietary Preference Field */}
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="dietaryPreference" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Dietary Preference
-                </FormLabel>
+                <FormLabel htmlFor="dietaryPreferences">Dietary Preference</FormLabel>
                 <TextField
                   id="dietaryPreferences"
                   name="dietaryPreferences"
@@ -167,17 +177,11 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
           </Grid>
         </Box>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "right", pb: 2 }}>
-        <Button onClick={onClose} variant="contained" color="primary">
+      <DialogActions>
+        <Button onClick={onClose} variant="contained">
           Cancel
         </Button>
-        <Button
-          type="button"
-          onClick={() => onUpdate(mealPlan)}
-          variant="contained"
-          color="primary"
-          disabled={!isFormValid}
-        >
+        <Button onClick={handleSubmit} variant="contained" color="primary">
           Update
         </Button>
       </DialogActions>
@@ -186,3 +190,4 @@ const UpdateMealPlan = ({ open, onClose, onUpdate, selectedMealPlanId }) => {
 };
 
 export default UpdateMealPlan;
+
