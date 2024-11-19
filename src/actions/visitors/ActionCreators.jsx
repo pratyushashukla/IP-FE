@@ -51,15 +51,29 @@ export const UPDATE_VISITOR =
 export const DELETE_VISITOR = (id, handleCloseMenu) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.delete(`/visitors/${id}`);
-    console.log("API response - delete visitor", apiResponse);
+
     if (apiResponse.status === 200) {
-      dispatch(GET_VISITORS());
-      handleCloseMenu();
+      dispatch(GET_VISITORS()); // Refresh the visitors list after deletion
+      handleCloseMenu(); // Close the menu if applicable
+    } else {
+      // Show the message from backend if status is not 200
+      alert(apiResponse.data.message || "An error occurred while deleting the visitor.");
     }
   } catch (error) {
-    handleNetworkError(error);
+    if (error.response && error.response.status === 400) {
+      // Specifically handling 400 errors and showing the backend message
+      alert(error.response.data.message || "Bad Request: This visitor is associated with appointments.");
+    } else {
+      handleNetworkError(error); // For other errors (network, 500, etc.)
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message); // Show the backend message
+      } else {
+        alert("An unexpected error occurred.");
+      }
+    }
   }
 };
+
 
 // Search visitors by filter parameters
 export const SEARCH_VISITORS = (searchParams) => async (dispatch) => {

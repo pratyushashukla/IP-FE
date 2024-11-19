@@ -105,6 +105,11 @@ const ViewInmates = ({ handleUpdateModal, handleDetailsModal }) => {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportInmateId, setReportInmateId] = useState(null);
 
+   // State for popup messages
+   const [popupMessage, setPopupMessage] = useState("");
+   const [isPopupOpen, setIsPopupOpen] = useState(false);
+ 
+
 
   // Fetch inmates data from API when the component mounts
   useEffect(() => {
@@ -138,14 +143,40 @@ const ViewInmates = ({ handleUpdateModal, handleDetailsModal }) => {
     handleDetailsModal(selectedInmateId);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     handleCloseMenu();
-    const updatedInmates = inmates.filter(
-      (inmate) => inmate._id !== selectedInmateId
-    );
-    setInmates(updatedInmates);
-    dispatch(DELETE_INMATE(selectedInmateId));
+  
+    // Dispatch delete action and catch response
+    try {
+      const response = await dispatch(DELETE_INMATE(selectedInmateId));
+  
+      // Check for a successful response (status 200)
+      if (response && response.status === 200) {
+        // Handle success message (if applicable)
+        setPopupMessage("Inmate deleted successfully.");
+        setIsPopupOpen(true);
+  
+        // Update the table with the new data (i.e., remove the deleted inmate from the list)
+        const updatedInmates = inmates.filter(
+          (inmate) => inmate._id !== selectedInmateId
+        );
+        setInmates(updatedInmates);
+      } else {
+        // If response is not 200, display the message from the backend
+        setPopupMessage(response?.message);
+        setIsPopupOpen(true);
+      }
+    } catch (error) {
+      // Handle any errors (e.g., network issues, server errors)
+      setPopupMessage("An error occurred while deleting the inmate.");
+      setIsPopupOpen(true);
+    }
   };
+  // Function to handle closing the popup after clicking "OK"
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);  // Close the popup
+  };
+  
 
   const handleOpenReportDialog = (inmateId) => {
     setReportInmateId(inmateId);
