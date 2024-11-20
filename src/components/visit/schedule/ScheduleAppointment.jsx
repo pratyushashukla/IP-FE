@@ -31,7 +31,7 @@ const ScheduleAppointment = () => {
     identityVerified: false,
     flaggedForSecurity: false,
     remarks: "",
-    staffId: localStorage.getItem("userId")
+    staffId: localStorage.getItem("userId"),
   });
 
   const [filteredVisitors, setFilteredVisitors] = useState([]);
@@ -58,12 +58,46 @@ const ScheduleAppointment = () => {
   };
 
   const handleDateTimeChange = (dateTime) => {
-    const estimatedEndTime = dayjs(dateTime).add(30, "minute");
-    setFormData((prev) => ({
-      ...prev,
-      startTime: new Date(dateTime),
-      estimatedEndTime: new Date(estimatedEndTime),
-    }));
+    const now = dayjs(); // Current date and time
+    const todayStart = dayjs().startOf("day"); // Start of today
+
+    if (dateTime) {
+      if (dayjs(dateTime).isBefore(now)) {
+        // If the selected date and time are in the past
+        setErrors((prev) => ({
+          ...prev,
+          startTime: "Visit date and time cannot be in the past",
+        }));
+        setFormData((prev) => ({
+          ...prev,
+          startTime: null,
+          estimatedEndTime: null,
+        }));
+      } else {
+        // Valid date and time
+        const estimatedEndTime = dayjs(dateTime).add(30, "minute");
+        setErrors((prev) => ({
+          ...prev,
+          startTime: null, // Clear any existing error
+        }));
+        setFormData((prev) => ({
+          ...prev,
+          startTime: dateTime,
+          estimatedEndTime: estimatedEndTime.toDate(), // Convert to JavaScript Date
+        }));
+      }
+    } else {
+      // If no dateTime is provided (null value)
+      setErrors((prev) => ({
+        ...prev,
+        startTime: "Visit date and time are required",
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        startTime: null,
+        estimatedEndTime: null,
+      }));
+    }
   };
 
   const resetForm = () => {
@@ -75,18 +109,18 @@ const ScheduleAppointment = () => {
       identityVerified: false,
       flaggedForSecurity: false,
       remarks: "",
-      staffId: localStorage.getItem("userId")
-    })
-  }
+      staffId: localStorage.getItem("userId"),
+    });
+  };
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.visitorId) newErrors.visitorId = "Visitor is required";
     if (!formData.inmateId) newErrors.inmateId = "Inmate is required";
-    if (!formData.visitDate) newErrors.visitDate = "Visit date is required";
-    if (!formData.startTime) newErrors.startTime = "Start time is required";
+    if (!formData.startTime) newErrors.startTime = "Visit date is required";
     if (!formData.status) newErrors.status = "Status is required";
-    if (!formData.remarks) newErrors.status = "Remarks is required regarding visitor";
+    if (!formData.remarks)
+      newErrors.status = "Remarks is required regarding visitor";
     if (formData.remarks.length > 50)
       newErrors.remarks = "Remarks should not exceed 50 characters";
 
@@ -141,6 +175,7 @@ const ScheduleAppointment = () => {
                       fullWidth
                       error={!!errors.inmateId}
                       helperText={errors.inmateId}
+                      required
                     />
                   )}
                 />
@@ -148,8 +183,15 @@ const ScheduleAppointment = () => {
 
               <Grid item xs={6}>
                 <Autocomplete
-                  disabled={formData?.inmateId?.length > 0 ? false : true}
+                  disabled={!formData.inmateId}
                   options={filteredVisitors}
+                  value={
+                    formData.visitorId
+                      ? filteredVisitors.find(
+                          (visitor) => visitor._id === formData.visitorId
+                        )
+                      : null
+                  }
                   getOptionLabel={(option) =>
                     `${option.firstname} ${option.lastname}`
                   }
@@ -161,13 +203,11 @@ const ScheduleAppointment = () => {
                     )
                   }
                   onChange={(e, value) => {
-                    const obj = {
-                      target: {
-                        name: "visitorId",
-                        value: value ? value._id : "",
-                      },
-                    };
-                    return handleChange(obj);
+                    const visitorId = value ? value._id : "";
+                    setFormData((prev) => ({
+                      ...prev,
+                      visitorId,
+                    }));
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -176,7 +216,7 @@ const ScheduleAppointment = () => {
                       fullWidth
                       error={!!errors.visitorId}
                       helperText={errors.visitorId}
-                      disabled={!formData.inmateId}
+                      required
                     />
                   )}
                 />
@@ -184,16 +224,19 @@ const ScheduleAppointment = () => {
 
               <Grid item xs={6}>
                 <DateTimePicker
+                  minDateTime={dayjs()} // Restrict to today and the current time
+                  disableCloseOnSelect={true} // Prevent picker from closing on selection
                   sx={{ width: "100%" }}
                   label="Visit Date & Time"
-                  value={formData.visitDateTime}
+                  value={formData.startTime}
                   onChange={handleDateTimeChange}
+                  ampm={false} // Use 24-hour format
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       fullWidth
-                      error={!!errors.visitDateTime}
-                      helperText={errors.visitDateTime}
+                      error={!!errors.startTime}
+                      helperText={errors.startTime}
                     />
                   )}
                 />
@@ -204,7 +247,7 @@ const ScheduleAppointment = () => {
                   label="Estimated End Time"
                   value={
                     formData.estimatedEndTime
-                      ? dayjs(formData.estimatedEndTime).format("hh:mm A")
+                      ? dayjs(formData.estimatedEndTime).format("HH:mm") // 24-hour format
                       : ""
                   }
                   fullWidth

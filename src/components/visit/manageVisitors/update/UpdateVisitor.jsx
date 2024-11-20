@@ -26,7 +26,7 @@ const UpdateVisitor = ({ open, onClose, onUpdate, selectedVisitorId }) => {
     contactNumber: "",
     address: "",
     relationship: "",
-    inmateId: "", // Added inmateId here
+    inmateId: "",
   });
 
   const [errors, setErrors] = useState({
@@ -57,40 +57,87 @@ const UpdateVisitor = ({ open, onClose, onUpdate, selectedVisitorId }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === "relationship") {
-      if (value === "") {
-        setErrors({
-          ...errors,
-          relationship: "Please select a relationship",
-        });
-      } else {
-        setErrors({
-          ...errors,
-          relationship: "",
-        });
-      }
-    }
-
+  
     if (name === "contactNumber") {
-      if (value.length === 10 && /^\d+$/.test(value)) {
-        setErrors({
-          ...errors,
-          contactNumber: "",
+      // Allow only numeric input and prevent entering more than 10 digits
+      if (/^\d*$/.test(value) && value.length <= 10) {
+        setVisitor({
+          ...visitor,
+          [name]: value,
         });
+  
+        // Clear error if valid
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "",
+        }));
       } else {
-        setErrors({
-          ...errors,
-          contactNumber: "Contact number must be 10 digits",
-        });
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "Contact number must be numeric and exactly 10 digits.",
+        }));
+      }
+    } else {
+      setVisitor({
+        ...visitor,
+        [name]: value,
+      });
+  
+      // Clear error for other fields
+      if (name === "relationship" && value.trim() === "") {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "Relationship is required.",
+        }));
+      } else if (name === "relationship") {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "",
+        }));
+      } else if (name === "lastname" && value.trim() === "") {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "Last Name is required.",
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "",
+        }));
       }
     }
-
-    setVisitor({
-      ...visitor,
-      [name]: value,
-    });
   };
+  
+  const validateFields = () => {
+    const newErrors = {};
+  
+    if (!visitor.lastname.trim()) {
+      newErrors.lastname = "Last Name is required.";
+    }
+  
+    if (!visitor.contactNumber.trim()) {
+      newErrors.contactNumber = "Contact Number is required.";
+    } else if (!/^\d{10}$/.test(visitor.contactNumber)) {
+      newErrors.contactNumber = "Contact number must be numeric and exactly 10 digits.";
+    }
+  
+    if (!visitor.relationship.trim()) {
+      newErrors.relationship = "Relationship is required.";
+    }
+  
+    if (!visitor.inmateId.trim()) {
+      newErrors.inmateId = "Assigning an inmate is required.";
+    }
+  
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  const handleUpdate = () => {
+    if (validateFields()) {
+      onUpdate(visitor);
+    }
+  };  
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -124,8 +171,9 @@ const UpdateVisitor = ({ open, onClose, onUpdate, selectedVisitorId }) => {
                 >
                   <MenuItem value="">Select a relationship</MenuItem>
                   <MenuItem value="family">Family</MenuItem>
-                  <MenuItem value="friend">Friend</MenuItem>
-                  {/* Add more relationships as needed */}
+                  <MenuItem value="friend">Friend</MenuItem>                  
+                  <MenuItem value="lawyer">Lawyer</MenuItem> 
+                  <MenuItem value="others">Others</MenuItem>     
                 </Select>
                 {errors.relationship !== "" && (
                   <div style={{ color: "red" }}>{errors.relationship}</div>
@@ -194,18 +242,16 @@ const UpdateVisitor = ({ open, onClose, onUpdate, selectedVisitorId }) => {
           Cancel
         </Button>
         <Button
-          onClick={() => onUpdate(visitor)}
+          onClick={handleUpdate}
           variant="contained"
           color="primary"
           disabled={
-            !visitor.firstname ||
-            !visitor.lastname ||
-            !visitor.contactNumber ||
-            !visitor.address ||
-            !visitor.relationship ||
-            !visitor.inmateId ||
-            errors.relationship !== "" ||
-            errors.contactNumber !== ""
+            errors.relationship !== "" || 
+            errors.contactNumber !== "" ||
+            !visitor.lastname.trim() ||
+            !visitor.contactNumber.trim() ||
+            !visitor.relationship.trim() ||
+            !visitor.inmateId.trim()
           }
         >
           Update

@@ -26,26 +26,63 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
     inmateId: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   // Accessing inmatesData from the Redux store
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
   
     if (name === "contactNumber") {
-      // Allow only digits and check the length
-      if (!/^\d*$/.test(value) || value.length > 10) {
-        setErrors({
-          ...errors,
-          contactNumber: "Contact number must be numeric and have exactly 10 digits.",
+      // Allow only numeric input and prevent entering more than 10 digits
+      if (/^\d*$/.test(value) && value.length <= 10) {
+        setVisitor({
+          ...visitor,
+          [name]: value,
         });
-        return;
-      }
-    }
   
-    setVisitor({
-      ...visitor,
-      [name]: value,
-    });
+        // Clear the error for contact number
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "",
+        }));
+      }
+    } else {
+      setVisitor({
+        ...visitor,
+        [name]: value,
+      });
+  
+      // Clear errors for other fields
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: "",
+      }));
+    }
+  };
+  
+
+  const validateFields = () => {
+    const newErrors = {};
+    if (!visitor.lastname.trim()) newErrors.lastname = "Last Name is required.";
+    if (!visitor.contactNumber.trim()) {
+      newErrors.contactNumber = "Contact Number is required.";
+    } else if (!/^\d{10}$/.test(visitor.contactNumber)) {
+      newErrors.contactNumber =
+        "Contact Number must be numeric and exactly 10 digits.";
+    }
+    if (!visitor.inmateId.trim()) newErrors.inmateId = "Assigning an inmate is required.";
+    if (!visitor.relationship.trim())
+      newErrors.relationship = "Relationship is required.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validateFields()) {
+      onCreate(visitor);
+    }
   };
 
   return (
@@ -72,13 +109,15 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormLabel htmlFor="lastname" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Last Name
+                  Last Name<span style={{ color: "red" }}>*</span>
                 </FormLabel>
                 <TextField
                   id="lastname"
                   name="lastname"
                   value={visitor.lastname}
                   onChange={handleInputChange}
+                  error={!!errors.lastname}
+                  helperText={errors.lastname}
                   variant="outlined"
                   required
                 />
@@ -88,13 +127,15 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormLabel htmlFor="contactNumber" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Contact Number
+                  Contact Number<span style={{ color: "red" }}>*</span>
                 </FormLabel>
                 <TextField
                   id="contactNumber"
                   name="contactNumber"
                   value={visitor.contactNumber}
                   onChange={handleInputChange}
+                  error={!!errors.contactNumber}
+                  helperText={errors.contactNumber}
                   variant="outlined"
                   required
                 />
@@ -104,13 +145,15 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormLabel htmlFor="inmateId" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Assign Inmate
+                  Assign Inmate<span style={{ color: "red" }}>*</span>
                 </FormLabel>
                 <TextField
                   id="inmateId"
                   name="inmateId"
                   value={visitor.inmateId}
                   onChange={handleInputChange}
+                  error={!!errors.inmateId}
+                  helperText={errors.inmateId}
                   select
                   variant="outlined"
                   required
@@ -142,19 +185,20 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormLabel htmlFor="relationship" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Relationship
+                  Relationship<span style={{ color: "red" }}>*</span>
                 </FormLabel>
                 <Select
                   id="relationship"
                   name="relationship"
                   value={visitor.relationship}
                   onChange={handleInputChange}
+                  error={!!errors.relationship}
+                  helperText={errors.inmateId}
                   variant="outlined"
                 >
                   <MenuItem value="">Select a relationship</MenuItem>
                   <MenuItem value="family">Family</MenuItem>
-                  <MenuItem value="friend">Friend</MenuItem>
-                  {/* Add more relationships as needed */}
+                  <MenuItem value="friend">Friend</MenuItem>                  
                 </Select>
               </FormControl>
             </Grid>
@@ -168,7 +212,7 @@ const CreateVisitor = ({ open, onClose, onCreate }) => {
         </Button>
         <Button
           type="button"
-          onClick={() => onCreate(visitor)}
+          onClick={handleSubmit}
           variant="contained"
           color="primary"
         >

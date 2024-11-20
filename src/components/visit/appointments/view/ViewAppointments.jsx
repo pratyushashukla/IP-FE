@@ -129,7 +129,8 @@ const ViewAppointments = ({ handleDetailsModal, handleUpdateModal }) => {
   };
 
   const handleConfirmDelete = () => {
-    dispatch(DELETE_VISIT(selectedId, handleCloseMenu));
+    handleCloseMenu();
+    dispatch(DELETE_VISIT(selectedId));
     setOpenDialog(false);
   };
 
