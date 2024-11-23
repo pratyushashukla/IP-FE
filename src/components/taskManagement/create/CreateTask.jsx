@@ -11,6 +11,8 @@ import {
   FormLabel,
   Box,
   MenuItem,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 
@@ -22,23 +24,62 @@ const CreateTask = ({ open, onClose, onCreate }) => {
     startDate: "",
     dueDate: "",
     isCompleted: false,
-    assignedTo: "", // Field for the assigned inmate ID,
+    assignedTo: "",
     assignedBy: localStorage.getItem("userId"),
   });
 
+  const [showMessage, setShowMessage] = useState(false); // For Snackbar alert
+  const [error, setError] = useState(""); // For inline error message
   const inmatesData = useSelector((state) => state.InmatesReducer.inmatesData);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setTask({
-      ...task,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : type === "date"
-          ? new Date(value).toISOString()
-          : value,
-    });
+    const { name, value } = e.target;
+
+    // Prevent user from entering an invalid due date
+    if (name === "dueDate" && task.startDate) {
+      if (new Date(value) < new Date(task.startDate)) {
+        setShowMessage(true); // Show alert
+        return; // Stop the input update
+      }
+    }
+
+    if (name === "startDate" && task.dueDate) {
+      if (new Date(task.dueDate) < new Date(value)) {
+        setShowMessage(true); // Show alert
+        return; // Stop the input update
+      }
+    }
+
+    // Update task state
+    setTask((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear error if dates are valid
+    if (name === "dueDate" || name === "startDate") {
+      if (
+        task.dueDate &&
+        task.startDate &&
+        new Date(task.dueDate) >= new Date(task.startDate)
+      ) {
+        setError(""); // Clear inline error
+      }
+    }
+  };
+
+  const handleCreate = () => {
+    if (!task.title || !task.startDate || !task.dueDate) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    if (new Date(task.dueDate) < new Date(task.startDate)) {
+      setShowMessage(true); // Prevent invalid task creation
+      return;
+    }
+
+    onCreate(task); // Proceed if valid
   };
 
   return (
@@ -109,27 +150,6 @@ const CreateTask = ({ open, onClose, onCreate }) => {
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="status" sx={{ mb: 1, fontWeight: "bold" }}>
-                  Status
-                </FormLabel>
-                <TextField
-                  id="status"
-                  name="status"
-                  value={task.status}
-                  onChange={handleInputChange}
-                  select
-                  variant="outlined"
-                  required
-                >
-                  <MenuItem value="Pending">Pending</MenuItem>
-                  <MenuItem value="Inprogress">In Progress</MenuItem>
-                  <MenuItem value="Completed">Completed</MenuItem>
-                </TextField>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12}>
-              <FormControl fullWidth>
                 <FormLabel
                   htmlFor="startDate"
                   sx={{ mb: 1, fontWeight: "bold" }}
@@ -140,10 +160,11 @@ const CreateTask = ({ open, onClose, onCreate }) => {
                   id="startDate"
                   name="startDate"
                   type="date"
-                  value={task.startDate ? task.startDate.split("T")[0] : ""}
+                  value={task.startDate}
                   onChange={handleInputChange}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
+                  required
                 />
               </FormControl>
             </Grid>
@@ -157,7 +178,7 @@ const CreateTask = ({ open, onClose, onCreate }) => {
                   id="dueDate"
                   name="dueDate"
                   type="date"
-                  value={task.dueDate ? task.dueDate.split("T")[0] : ""}
+                  value={task.dueDate}
                   onChange={handleInputChange}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
@@ -165,6 +186,13 @@ const CreateTask = ({ open, onClose, onCreate }) => {
                 />
               </FormControl>
             </Grid>
+
+            {/* Inline Error */}
+            {error && (
+              <Grid item xs={12}>
+                <Box sx={{ color: "red", mt: 1 }}>{error}</Box>
+              </Grid>
+            )}
           </Grid>
         </Box>
       </DialogContent>
@@ -175,13 +203,28 @@ const CreateTask = ({ open, onClose, onCreate }) => {
         </Button>
         <Button
           type="button"
-          onClick={() => onCreate(task)}
+          onClick={handleCreate} // Ensure valid task creation
           variant="contained"
           color="primary"
         >
           Create
         </Button>
       </DialogActions>
+
+      {/* Snackbar for Alert Messages */}
+      <Snackbar
+        open={showMessage}
+        autoHideDuration={4000}
+        onClose={() => setShowMessage(false)}
+      >
+        <Alert
+          onClose={() => setShowMessage(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Due date cannot be earlier than the start date.
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 };
