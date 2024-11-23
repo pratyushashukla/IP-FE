@@ -25,23 +25,12 @@ export const ADDUSER = (obj, formRef, handleDialog, showDialog) => async (dispat
   }
 };
 
+
 export const EDITUSER = (id, obj) => async (dispatch) => {
   try {
     const apiResponse = await ApiService.patch(`/users/${id}`, obj);
     if (apiResponse) {
       dispatch(GETUSERDATA());
-    }
-  } catch (error) {
-    handleNetworkError(error);
-  }
-};
-
-export const EDITPROFILE = (id, obj, formRef) => async (dispatch) => {
-  try {
-    const apiResponse = await ApiService.patch(`/users/${id}`, { data: obj });
-    if (apiResponse) {
-      dispatch(GETUSERDATA());
-      formRef.current.reset();
     }
   } catch (error) {
     handleNetworkError(error);
