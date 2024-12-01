@@ -33,6 +33,10 @@ function AppointmentDetailsDialog({ open, onClose, visit }) {
               <Typography>{visit.estimatedEndTime ? new Date(visit.estimatedEndTime).toLocaleString() : "N/A"}</Typography>
             </Grid>
             <Grid item xs={6}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>Actual End Time:</Typography>
+              <Typography>{visit.actualEndTime ? new Date(visit.actualEndTime).toLocaleString() : "N/A"}</Typography>
+            </Grid>
+            <Grid item xs={6}>
               <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>Status:</Typography>
               <Typography>{visit.status || "N/A"}</Typography>
             </Grid>

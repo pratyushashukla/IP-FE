@@ -24,8 +24,8 @@ const ScheduleAppointment = () => {
   );
 
   const [formData, setFormData] = useState({
-    visitorId: "",
-    inmateId: "",
+    visitorId: null,
+    inmateId: null,
     startTime: null,
     estimatedEndTime: null,
     identityVerified: false,
@@ -102,8 +102,8 @@ const ScheduleAppointment = () => {
 
   const resetForm = () => {
     setFormData({
-      visitorId: "",
-      inmateId: "",
+      visitorId: null,
+      inmateId: null,
       startTime: null,
       estimatedEndTime: null,
       identityVerified: false,

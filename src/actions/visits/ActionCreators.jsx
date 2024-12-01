@@ -16,8 +16,7 @@ export const GET_VISITS = () => async (dispatch) => {
 // Add new visit data
 export const ADD_VISIT = (visit, resetForm) => async (dispatch) => {
   try {
-    const apiResponse = await ApiService.post(`/appointments`, visit);
-    console.log("API response - create visit", apiResponse);
+    const apiResponse = await ApiService.post(`/appointments`, visit);    
     if (apiResponse) {
       dispatch(GET_VISITS());
       resetForm();

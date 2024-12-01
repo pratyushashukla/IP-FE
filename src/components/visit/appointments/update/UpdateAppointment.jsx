@@ -29,14 +29,14 @@ const UpdateAppointment = ({ open, onClose, onUpdate, SelectedRow }) => {
     visitorId: "",
     inmateId: "",
     startDate: dayjs(null),
-    endDate: dayjs(null),
+    actualEndTime: dayjs(null),
     status: "",
   });
   const [dataForUpdate, setDataForUpdate] = useState({});
 
   const [errors, setErrors] = useState({
     startDate: "",
-    endDate: "",
+    actualEndTime: "",
   });
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const UpdateAppointment = ({ open, onClose, onUpdate, SelectedRow }) => {
           visitorId: selectedAppointment.visitorId._id,
           inmateId: selectedAppointment.inmateId._id,
           startDate: dayjs(selectedAppointment.startTime),
-          endDate: dayjs(selectedAppointment.endTime),
+          actualEndTime: dayjs(selectedAppointment.endTime),
           status: selectedAppointment.status,
         });
       }
@@ -143,14 +143,14 @@ const UpdateAppointment = ({ open, onClose, onUpdate, SelectedRow }) => {
                 <FormControl fullWidth>
                   <FormLabel sx={{ mb: 1 }}>End Date</FormLabel>
                   <DateTimePicker
-                    value={dataForUpdate.endDate || appointment.endDate}
-                    onChange={(date) => handleDateTimeChange("endDate", date)}
+                    value={dataForUpdate.actualEndTime || appointment.actualEndTime}
+                    onChange={(date) => handleDateTimeChange("actualEndTime", date)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         fullWidth
-                        error={!!errors.endDate}
-                        helperText={errors.endDate}
+                        error={!!errors.actualEndTime}
+                        helperText={errors.actualEndTime}
                       />
                     )}
                   />
@@ -213,10 +213,10 @@ const UpdateAppointment = ({ open, onClose, onUpdate, SelectedRow }) => {
             !appointment.visitorId ||
             !appointment.inmateId ||
             !appointment.startDate ||
-            !appointment.endDate ||
+            !appointment.actualEndTime ||
             !appointment.status ||
             errors.startDate ||
-            errors.endDate
+            errors.actualEndTime
           }
         >
           Update
